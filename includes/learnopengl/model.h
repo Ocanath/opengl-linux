@@ -33,7 +33,7 @@ public:
     bool gammaCorrection;
 
     // constructor, expects a filepath to a 3D model.
-    Model(string const &path, bool gamma = false) : gammaCorrection(gamma)
+    Model(const char * path, bool gamma = false) : gammaCorrection(gamma)
     {
         loadModel(path);
     }
@@ -47,8 +47,9 @@ public:
     
 private:
     // loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
-    void loadModel(string const &path)
+    void loadModel(const char *path)
     {
+        printf("Loading %s\r\n", path);
         // read file via ASSIMP
         Assimp::Importer importer;
         const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
@@ -59,7 +60,7 @@ private:
             return;
         }
         // retrieve the directory path of the filepath
-        directory = path.substr(0, path.find_last_of('/'));
+        //directory = path.substr(0, path.find_last_of('/'));
 
         // process ASSIMP's root node recursively
         processNode(scene->mRootNode, scene);
@@ -177,6 +178,7 @@ private:
         {
             aiString str;
             mat->GetTexture(type, i, &str);
+            //std::cout << "attempting to load: " << str.C_Str() << endl; //for some reason the first 4 characters are getting truncated off. really weird
             // check if texture was loaded before and if so, continue to next iteration: skip loading a new texture
             bool skip = false;
             for(unsigned int j = 0; j < textures_loaded.size(); j++)
@@ -236,7 +238,7 @@ unsigned int TextureFromFile(const char *path, const string &directory, bool gam
     }
     else
     {
-        std::cout << "Texture failed to load at path: " << path << std::endl;
+        std::cout << "whyisthisfailingTexture failed to load at path: " << path << std::endl;
         stbi_image_free(data);
     }
 

@@ -91,7 +91,7 @@ int main()
 
     // load models
     // -----------
-    Model backpack(FileSystem::getPath("resources/objects/backpack/backpack.obj"));
+    Model backpack("/home/admin/OcanathProj/LearnOpenGL/resources/objects/backpack/backpack.obj");
 
     // configure g-buffer framebuffer
     // ------------------------------

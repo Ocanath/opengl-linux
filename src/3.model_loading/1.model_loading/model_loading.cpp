@@ -82,9 +82,8 @@ int main()
 
     // load models
     // -----------
-    Model ourModel(FileSystem::getPath("resources/objects/backpack/backpack.obj"));
+    Model ourModel("/home/admin/OcanathProj/LearnOpenGL/resources/objects/backpack/backpack.obj");
 
-    
     // draw in wireframe
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
