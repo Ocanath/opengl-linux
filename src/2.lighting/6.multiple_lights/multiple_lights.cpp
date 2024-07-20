@@ -19,8 +19,8 @@ void processInput(GLFWwindow *window);
 unsigned int loadTexture(const char *path);
 
 // settings
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+const unsigned int SCR_WIDTH = 1200;
+const unsigned int SCR_HEIGHT = 900;
 
 // camera
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
@@ -146,7 +146,8 @@ int main()
         glm::vec3( 0.7f,  0.2f,  2.0f),
         glm::vec3( 2.3f, -3.3f, -4.0f),
         glm::vec3(-4.0f,  2.0f, -12.0f),
-        glm::vec3( 0.0f,  0.0f, -3.0f)
+        glm::vec3( 0.0f,  0.0f, -3.0f),
+        glm::vec3( 0.0f,  0.0f, 0.0f)
     };
     // first, configure the cube's VAO (and VBO)
     unsigned int VBO, cubeVAO;
@@ -246,6 +247,7 @@ int main()
         lightingShader.setFloat("pointLights[2].linear", 0.09f);
         lightingShader.setFloat("pointLights[2].quadratic", 0.032f);
         // point light 4
+        pointLightPositions[3] = glm::vec3(0,0,sin(currentFrame));
         lightingShader.setVec3("pointLights[3].position", pointLightPositions[3]);
         lightingShader.setVec3("pointLights[3].ambient", 0.05f, 0.05f, 0.05f);
         lightingShader.setVec3("pointLights[3].diffuse", 0.8f, 0.8f, 0.8f);
@@ -253,6 +255,15 @@ int main()
         lightingShader.setFloat("pointLights[3].constant", 1.0f);
         lightingShader.setFloat("pointLights[3].linear", 0.09f);
         lightingShader.setFloat("pointLights[3].quadratic", 0.032f);
+        // point light 5
+        pointLightPositions[4] = glm::vec3(0,cos(currentFrame),0);
+        lightingShader.setVec3("pointLights[4].position", pointLightPositions[4]);
+        lightingShader.setVec3("pointLights[4].ambient", 0.05f, 0.05f, 0.05f);
+        lightingShader.setVec3("pointLights[4].diffuse", 0.8f, 0.8f, 0.8f);
+        lightingShader.setVec3("pointLights[4].specular", 1.0f, 1.0f, 1.0f);
+        lightingShader.setFloat("pointLights[4].constant", 1.0f);
+        lightingShader.setFloat("pointLights[4].linear", 0.09f);
+        lightingShader.setFloat("pointLights[4].quadratic", 0.032f);
         // spotLight
         lightingShader.setVec3("spotLight.position", camera.Position);
         lightingShader.setVec3("spotLight.direction", camera.Front);
@@ -303,7 +314,7 @@ int main()
     
          // we now draw as many light bulbs as we have point lights.
          glBindVertexArray(lightCubeVAO);
-         for (unsigned int i = 0; i < 4; i++)
+         for (unsigned int i = 0; i < 5; i++)
          {
              model = glm::mat4(1.0f);
              model = glm::translate(model, pointLightPositions[i]);
