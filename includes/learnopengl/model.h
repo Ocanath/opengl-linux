@@ -33,7 +33,7 @@ public:
     bool gammaCorrection;
 
     // constructor, expects a filepath to a 3D model.
-    Model(const char * path, bool gamma = false) : gammaCorrection(gamma)
+    Model(string const& path, bool gamma = false) : gammaCorrection(gamma)
     {
         loadModel(path);
     }
@@ -47,9 +47,9 @@ public:
     
 private:
     // loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
-    void loadModel(const char *path)
+    void loadModel(string const& path)
     {
-        printf("Loading %s\r\n", path);
+        printf("Loading %s\r\n", path.c_str());
         // read file via ASSIMP
         Assimp::Importer importer;
         const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
@@ -60,7 +60,8 @@ private:
             return;
         }
         // retrieve the directory path of the filepath
-        //directory = path.substr(0, path.find_last_of('/'));
+        directory = path.substr(0, path.find_last_of('/'));
+        printf("Directorty: %s\r\n", directory.c_str());
 
         // process ASSIMP's root node recursively
         processNode(scene->mRootNode, scene);

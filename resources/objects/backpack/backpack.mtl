@@ -10,7 +10,7 @@ Ke 0.0 0.0 0.0
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd ****/home/admin/OcanathProj/LearnOpenGL/resources/objects/backpack/diffuse.jpg
-map_Bump ****/home/admin/OcanathProj/LearnOpenGL/resources/objects/backpack/normal.png
-map_Ks ****/home/admin/OcanathProj/LearnOpenGL/resources/objects/backpack/specular.jpg
+map_Kd diffuse.jpg
+map_Bump normal.png
+map_Ks specular.jpg
 

@@ -91,7 +91,7 @@ int main()
 
     // load models
     // -----------
-    Model backpack("/home/admin/OcanathProj/LearnOpenGL/resources/objects/backpack/backpack.obj");
+    Model backpack("../../resources/objects/backpack/backpack.obj");
 
     // configure g-buffer framebuffer
     // ------------------------------

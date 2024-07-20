@@ -82,7 +82,7 @@ int main()
 
     // load models
     // -----------
-    Model ourModel("/home/admin/OcanathProj/LearnOpenGL/resources/objects/backpack/backpack.obj");
+    Model ourModel("../../resources/objects/backpack/backpack.obj");
 
     // draw in wireframe
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
