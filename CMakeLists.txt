@@ -63,10 +63,10 @@ endif(WIN32)
 
 set(CHAPTERS
     # 1.getting_started
-    # 2.lighting
+    2.lighting
     3.model_loading
     # 4.advanced_opengl
-    5.advanced_lighting
+    # 5.advanced_lighting
     # 6.pbr
     # 7.in_practice
 )
@@ -98,7 +98,7 @@ set(CHAPTERS
 #     7.4.camera_class
 # )
 
-# set(2.lighting
+set(2.lighting
 #     1.colors
 #     2.1.basic_lighting_diffuse
 #     2.2.basic_lighting_specular
@@ -111,8 +111,8 @@ set(CHAPTERS
 #     5.2.light_casters_point
 #     5.3.light_casters_spot
 #     5.4.light_casters_spot_soft
-#     6.multiple_lights
-# )
+    6.multiple_lights
+)
 
 set(3.model_loading
     1.model_loading
@@ -139,7 +139,7 @@ set(3.model_loading
 #     11.2.anti_aliasing_offscreen
 # )
 
-set(5.advanced_lighting
+# set(5.advanced_lighting
     # 1.advanced_lighting
     # 2.gamma_correction
     # 3.1.1.shadow_mapping_depth
@@ -155,8 +155,8 @@ set(5.advanced_lighting
     # 7.bloom
     # 8.1.deferred_shading
     # 8.2.deferred_shading_volumes
-    9.ssao
-)
+    # 9.ssao
+# )
 
 # set(6.pbr
 #     1.1.lighting
