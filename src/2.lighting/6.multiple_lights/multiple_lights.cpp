@@ -11,6 +11,7 @@
 #include <learnopengl/camera.h>
 
 #include <iostream>
+#include "AssetModel.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -186,6 +187,8 @@ int main()
     lightingShader.setInt("material.diffuse", 0);
     lightingShader.setInt("material.specular", 1);
 
+	AssetModel ourModel("misc_models/backpack/backpack.obj");
+
 
     // render loop
     // -----------
@@ -306,6 +309,8 @@ int main()
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
+
+        ourModel.Draw(lightingShader, NULL);
 
          // also draw the lamp object(s)
          lightCubeShader.use();
