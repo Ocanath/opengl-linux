@@ -309,6 +309,9 @@ int main()
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
 
+        mat4_t hw_backpack = Hz(currentFrame);        
+        model = ht_matrix_to_mat4_t(hw_backpack);
+        lightingShader.setMat4("model", model);
         ourModel.Draw(lightingShader, NULL);
 
          // also draw the lamp object(s)
