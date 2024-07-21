@@ -289,10 +289,10 @@ int main()
         // render containers
         glBindVertexArray(cubeVAO);
 
-        mat4_t hw_backpack = Hz(0);        
-        hw_backpack.m[0][3] = 2.0;
-        hw_backpack.m[1][3] = 2.0;
-        hw_backpack.m[1][3] = -2.0;
+        mat4_t hw_backpack = Hscale(0.25);        
+        hw_backpack.m[0][3] = .0;
+        hw_backpack.m[1][3] = .0;
+        hw_backpack.m[1][3] = .0;
         model = ht_matrix_to_mat4_t(hw_backpack);
         lightingShader.setMat4("model", model);
         backpack.Draw(lightingShader, NULL);
@@ -308,16 +308,16 @@ int main()
          lightCubeShader.setMat4("projection", projection);
          lightCubeShader.setMat4("view", view);
     
-         // we now draw as many light bulbs as we have point lights.
-         glBindVertexArray(lightCubeVAO);
-         for (unsigned int i = 0; i < 5; i++)
-         {
-             model = glm::mat4(1.0f);
-             model = glm::translate(model, pointLightPositions[i]);
-             model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
-             lightCubeShader.setMat4("model", model);
-             glDrawArrays(GL_TRIANGLES, 0, 36);
-         }
+        //  // we now draw as many light bulbs as we have point lights.
+        //  glBindVertexArray(lightCubeVAO);
+        //  for (unsigned int i = 0; i < 5; i++)
+        //  {
+        //      model = glm::mat4(1.0f);
+        //      model = glm::translate(model, pointLightPositions[i]);
+        //      model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
+        //      lightCubeShader.setMat4("model", model);
+        //      glDrawArrays(GL_TRIANGLES, 0, 36);
+        //  }
 
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
