@@ -178,8 +178,9 @@ int main()
     lightingShader.setInt("material.diffuse", 0);
     lightingShader.setInt("material.specular", 1);
 
-	AssetModel backpack("../../resources/objects/backpack/backpack.obj");
-    AssetModel planet("../../resources/objects/planet/planet.obj");
+
+	AssetModel backpack(FileSystem::getPath("resources/objects/backpack/backpack.obj"));
+    AssetModel planet(FileSystem::getPath("resources/objects/planet/planet.obj"));
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window))
