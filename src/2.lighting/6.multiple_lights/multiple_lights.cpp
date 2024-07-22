@@ -15,20 +15,11 @@
 #include "PPP.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void mouse_callback(GLFWwindow* window, double xpos, double ypos);
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-void processInput(GLFWwindow *window);
 unsigned int loadTexture(const char *path);
 
 // settings
 const unsigned int SCR_WIDTH = 1200;
 const unsigned int SCR_HEIGHT = 900;
-
-// camera
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
-float lastX = SCR_WIDTH / 2.0f;
-float lastY = SCR_HEIGHT / 2.0f;
-bool firstMouse = true;
 
 // timing
 float deltaTime = 0.0f;
@@ -61,8 +52,6 @@ int main()
     }
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-    glfwSetCursorPosCallback(window, mouse_callback);
-    glfwSetScrollCallback(window, scroll_callback);
 
     // tell GLFW to capture our mouse
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -178,22 +167,52 @@ int main()
     lightingShader.setInt("material.diffuse", 0);
     lightingShader.setInt("material.specular", 1);
 
-
+    //load objects
 	AssetModel backpack(FileSystem::getPath("resources/objects/backpack/backpack.obj"));
     AssetModel planet(FileSystem::getPath("resources/objects/planet/planet.obj"));
+
+    //camera
+    //glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom),  0.1f, 100.0f);
+    glm::mat4 CameraProjection = glm::perspective(120.0f, (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 10000.0f);
+    glm::mat4 View = glm::mat4(1.0);
+    glm::mat4 Model = glm::mat4(1.0);
+    glm::mat4 MVP = CameraProjection * View * Model;
+    joint cam_joints[CAM_NUM_FRAMES];
+    CamControlStruct Player;				//specialized camera structure. carries around movement parameters
+    init_cam(&Player, cam_joints);
+    Player.CamRobot.hb_0 = mat4_t_mult(Hx(PI), mat4_t_I());
+    Player.CamRobot.hw_b = mat4_t_I();		//END initializing camera
+    Player.CamRobot.hw_b.m[0][3] = 7.044519f;
+    Player.CamRobot.hw_b.m[1][3] = -7.886983f;
+    Player.CamRobot.hw_b.m[2][3] = 3.428428f;
+    Player.CamRobot.j[1].q = fmod(188.713150f + PI, 2 * PI) - PI;
+    Player.CamRobot.j[2].q = fmod(-1.767589f + PI, 2 * PI) - PI;	//Player.CamRobot.j[2].q = -PI/2;
+    Player.lock_in_flag = 0;
+    Player.look_at_flag = 1;
+
+    //target for the cam to look at
+    vect3_t target = { {0.0, 0.f, 0.f} };
+
+    //get start time
+    double start_time = glfwGetTime();
+    double prev_time = start_time;
+
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window))
     {
         // per-frame time logic
         // --------------------
-        float currentFrame = static_cast<float>(glfwGetTime());
-        deltaTime = currentFrame - lastFrame;
-        lastFrame = currentFrame;
+        double time = glfwGetTime();
+        double fps = 1.0 / (time - prev_time);
+        prev_time = time;
+        uint64_t tick = GetTickCount64();
 
         // input
         // -----
-        processInput(window);
+        View = keyboard_cam_control(window, &Player, fps, target);
+        MVP = CameraProjection * View * Model;
+
 
         // render
         // ------
@@ -202,7 +221,9 @@ int main()
 
         // be sure to activate shader when setting uniforms/drawing objects
         lightingShader.use();
-        lightingShader.setVec3("viewPos", camera.Position);
+        vect3_t cam_origin = h_origin(Player.CamRobot.hw_b);
+        glm::vec3 camera_position = glm::vec3(cam_origin.v[0], cam_origin.v[1], cam_origin.v[2]);
+        lightingShader.setVec3("viewPos", camera_position);
         lightingShader.setFloat("material.shininess", 32.0f);
 
         /*
@@ -241,7 +262,7 @@ int main()
         lightingShader.setFloat("pointLights[2].linear", 0.09f);
         lightingShader.setFloat("pointLights[2].quadratic", 0.032f);
         // point light 4
-        pointLightPositions[3] = glm::vec3(0,0,sin(currentFrame));
+        pointLightPositions[3] = glm::vec3(0,0,sin(time));
         lightingShader.setVec3("pointLights[3].position", pointLightPositions[3]);
         lightingShader.setVec3("pointLights[3].ambient", 0.05f, 0.05f, 0.05f);
         lightingShader.setVec3("pointLights[3].diffuse", 0.8f, 0.8f, 0.8f);
@@ -250,7 +271,7 @@ int main()
         lightingShader.setFloat("pointLights[3].linear", 0.09f);
         lightingShader.setFloat("pointLights[3].quadratic", 0.032f);
         // point light 5
-        pointLightPositions[4] = glm::vec3(0,cos(currentFrame),0);
+        pointLightPositions[4] = glm::vec3(0,cos(time),0);
         lightingShader.setVec3("pointLights[4].position", pointLightPositions[4]);
         lightingShader.setVec3("pointLights[4].ambient", 0.05f, 0.05f, 0.05f);
         lightingShader.setVec3("pointLights[4].diffuse", 0.8f, 0.8f, 0.8f);
@@ -259,8 +280,8 @@ int main()
         lightingShader.setFloat("pointLights[4].linear", 0.09f);
         lightingShader.setFloat("pointLights[4].quadratic", 0.032f);
         // spotLight
-        lightingShader.setVec3("spotLight.position", camera.Position);
-        lightingShader.setVec3("spotLight.direction", camera.Front);
+        lightingShader.setVec3("spotLight.position", camera_position);
+        lightingShader.setVec3("spotLight.direction", glm::vec3(1,0,0));
         lightingShader.setVec3("spotLight.ambient", 0.0f, 0.0f, 0.0f);
         lightingShader.setVec3("spotLight.diffuse", 1.0f, 1.0f, 1.0f);
         lightingShader.setVec3("spotLight.specular", 1.0f, 1.0f, 1.0f);
@@ -271,10 +292,8 @@ int main()
         lightingShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));     
 
         // view/projection transformations
-        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-        glm::mat4 view = camera.GetViewMatrix();
-        lightingShader.setMat4("projection", projection);
-        lightingShader.setMat4("view", view);
+        lightingShader.setMat4("projection", CameraProjection);
+        lightingShader.setMat4("view", View);
 
         // world transformation
         glm::mat4 model = glm::mat4(1.0f);
@@ -303,12 +322,6 @@ int main()
         lightingShader.setMat4("model", model);
         planet.Draw(lightingShader,NULL);
 
-
-         // also draw the lamp object(s)
-         lightCubeShader.use();
-         lightCubeShader.setMat4("projection", projection);
-         lightCubeShader.setMat4("view", view);
-    
         //  // we now draw as many light bulbs as we have point lights.
         //  glBindVertexArray(lightCubeVAO);
         //  for (unsigned int i = 0; i < 5; i++)
@@ -339,23 +352,6 @@ int main()
     return 0;
 }
 
-// process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
-// ---------------------------------------------------------------------------------------------------------
-void processInput(GLFWwindow *window)
-{
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
-
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        camera.ProcessKeyboard(FORWARD, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        camera.ProcessKeyboard(BACKWARD, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        camera.ProcessKeyboard(LEFT, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        camera.ProcessKeyboard(RIGHT, deltaTime);
-}
-
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
 // ---------------------------------------------------------------------------------------------
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
@@ -365,35 +361,8 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     glViewport(0, 0, width, height);
 }
 
-// glfw: whenever the mouse moves, this callback is called
-// -------------------------------------------------------
-void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
-{
-    float xpos = static_cast<float>(xposIn);
-    float ypos = static_cast<float>(yposIn);
 
-    if (firstMouse)
-    {
-        lastX = xpos;
-        lastY = ypos;
-        firstMouse = false;
-    }
 
-    float xoffset = xpos - lastX;
-    float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
-
-    lastX = xpos;
-    lastY = ypos;
-
-    camera.ProcessMouseMovement(xoffset, yoffset);
-}
-
-// glfw: whenever the mouse scroll wheel scrolls, this callback is called
-// ----------------------------------------------------------------------
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
-{
-    camera.ProcessMouseScroll(static_cast<float>(yoffset));
-}
 
 // utility function for loading a 2D texture from file
 // ---------------------------------------------------
