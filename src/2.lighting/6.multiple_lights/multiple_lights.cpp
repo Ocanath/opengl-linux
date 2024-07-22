@@ -206,7 +206,6 @@ int main()
         double time = glfwGetTime();
         double fps = 1.0 / (time - prev_time);
         prev_time = time;
-        uint64_t tick = GetTickCount64();
 
         // input
         // -----
