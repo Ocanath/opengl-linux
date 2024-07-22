@@ -309,7 +309,7 @@ int main()
         // render containers
         glBindVertexArray(cubeVAO);
 
-        mat4_t hw_backpack = Hscale(0.25);        
+        mat4_t hw_backpack = mat4_t_mult( Hx(PI / 2), Hscale(0.25) );
         hw_backpack.m[0][3] = .0;
         hw_backpack.m[1][3] = .0;
         hw_backpack.m[1][3] = .0;
