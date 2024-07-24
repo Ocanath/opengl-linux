@@ -142,14 +142,6 @@ function(create_project_from_sources)
     endif(MSVC)
 endfunction()
 
-# then create a project file per tutorial
-foreach(CHAPTER ${CHAPTERS})
-    foreach(DEMO ${${CHAPTER}})
-		create_project_from_sources(${CHAPTER} ${DEMO})
-    endforeach(DEMO)
-endforeach(CHAPTER)
-foreach(GUEST_ARTICLE ${GUEST_ARTICLES})
-	create_project_from_sources(${GUEST_ARTICLE} "")
-endforeach(GUEST_ARTICLE)
+create_project_from_sources()
 
 include_directories(${CMAKE_SOURCE_DIR}/includes)
