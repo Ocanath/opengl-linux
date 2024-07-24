@@ -101,6 +101,7 @@ void scroll(GLFWwindow* window, double xoffset, double yoffset) {
 
 // main function
 int main(int argc, const char** argv) {
+  printf("wascuzup bichs\r\n");
   // check command-line arguments
   if (argc!=2) {
     std::printf(" USAGE:  basic modelfile\n");
