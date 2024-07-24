@@ -83,16 +83,16 @@ macro(makeLink src dest target)
   add_custom_command(TARGET ${target} POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink ${src} ${dest}  DEPENDS  ${dest} COMMENT "mklink ${src} -> ${dest}")
 endmacro()
 
-function(create_project_from_sources chapter demo)
+function(create_project_from_sources)
 	file(GLOB SOURCE
-            "src/${chapter}/${demo}/*.h"
-            "src/${chapter}/${demo}/*.cpp"
-            "src/${chapter}/${demo}/*.vs"
-            "src/${chapter}/${demo}/*.fs"
-            "src/${chapter}/${demo}/*.tcs"
-            "src/${chapter}/${demo}/*.tes"
-            "src/${chapter}/${demo}/*.gs"
-            "src/${chapter}/${demo}/*.cs"
+            "src/*.h"
+            "src/*.cpp"
+            "src/*.vs"
+            "src/*.fs"
+            "src/*.tcs"
+            "src/*.tes"
+            "src/*.gs"
+            "src/*.cs"
     )
 	if (demo STREQUAL "")
 		SET(replaced "")
