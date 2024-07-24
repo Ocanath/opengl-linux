@@ -94,13 +94,7 @@ function(create_project_from_sources)
             "src/*.gs"
             "src/*.cs"
     )
-	if (demo STREQUAL "")
-		SET(replaced "")
-		string(REPLACE "/" "_" replaced ${chapter})
-		set(NAME ${replaced})
-	else()
-		set(NAME "${chapter}__${demo}")
-	endif()
+    set(NAME "jessescrappyworld")
     add_executable(${NAME} ${SOURCE})
     target_link_libraries(${NAME} ${LIBS})
     if(MSVC)
@@ -119,13 +113,13 @@ function(create_project_from_sources)
     endif(WIN32)
     # copy shader files to build directory
     file(GLOB SHADERS
-             "src/${chapter}/${demo}/*.vs"
-             # "src/${chapter}/${demo}/*.frag"
-             "src/${chapter}/${demo}/*.fs"
-             "src/${chapter}/${demo}/*.tcs"
-             "src/${chapter}/${demo}/*.tes"
-             "src/${chapter}/${demo}/*.gs"
-             "src/${chapter}/${demo}/*.cs"
+             "src/*.vs"
+             # "src/*.frag"
+             "src/*.fs"
+             "src/*.tcs"
+             "src/*.tes"
+             "src/*.gs"
+             "src/*.cs"
     )
 	# copy dlls
 	file(GLOB DLLS "dlls/*.dll")
