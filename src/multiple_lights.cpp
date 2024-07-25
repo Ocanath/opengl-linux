@@ -6,7 +6,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-//#include <mujoco/mujoco.h>
+#include <mujoco/mujoco.h>
 
 #include <learnopengl/filesystem.h>
 #include <learnopengl/shader_m.h>
