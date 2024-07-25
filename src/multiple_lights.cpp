@@ -201,6 +201,18 @@ int main()
 
     // render loop
     // -----------
+    mjModel* m = NULL;                  // MuJoCo model
+    mjData* d = NULL;                   // MuJoCo data
+    char error[1000] = "Could not load binary model";
+    m = mj_loadXML("/home/admin/Psyonic/ability-hand-api/URDF/mujoco/abh_left_large.xml", 0, error, 1000);
+    if (!m) 
+    {
+        mju_error("Load model error: %s", error);
+    }
+    d = mj_makeData(m); 
+
+
+
     while (!glfwWindowShouldClose(window))
     {
         // per-frame time logic

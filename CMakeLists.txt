@@ -1,11 +1,67 @@
-cmake_minimum_required (VERSION 3.0)
-cmake_policy(VERSION 3.0)
+cmake_minimum_required (VERSION 3.16)
+# cmake_policy(VERSION 3.0)
 
-project(LearnOpenGL)
+project(mujoco)
 
 set(CMAKE_CXX_STANDARD 17) # this does nothing for MSVC, use target_compile_options below
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
+
+
+#############################what the hell, let's send this shit##################################
+
+set(CMAKE_POLICY_DEFAULT_CMP0072 NEW)
+
+
+set(MUJOCO_HEADERS
+    include/mujoco/mjdata.h
+    include/mujoco/mjexport.h
+    include/mujoco/mjmacro.h
+    include/mujoco/mjmodel.h
+    include/mujoco/mjplugin.h
+    include/mujoco/mjrender.h
+    include/mujoco/mjspec.h
+    include/mujoco/mjthread.h
+    include/mujoco/mjtnum.h
+    include/mujoco/mjui.h
+    include/mujoco/mjvisualize.h
+    include/mujoco/mjxmacro.h
+    include/mujoco/mujoco.h
+)
+
+add_library(mujoco SHARED ${MUJOCO_RESOURCE_FILES})
+target_include_directories(
+  mujoco
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/>
+  PRIVATE src
+)
+
+
+add_subdirectory(plugin/elasticity)
+add_subdirectory(plugin/actuator)
+add_subdirectory(plugin/sensor)
+add_subdirectory(plugin/sdf)
+add_subdirectory(src/engine)
+add_subdirectory(src/user)
+add_subdirectory(src/xml)
+add_subdirectory(src/render)
+add_subdirectory(src/thread)
+add_subdirectory(src/ui)
+add_subdirectory(model)
+
+
+target_link_libraries(
+  mujoco
+  PRIVATE ccd
+          lodepng
+          qhullstatic_r
+          tinyobjloader
+          tinyxml2
+)
+
+#######################################END IDIOCY#################################################
+
 
 IF(NOT CMAKE_BUILD_TYPE)
   SET(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build (Debug or Release)" FORCE)
