@@ -102,23 +102,13 @@ void scroll(GLFWwindow* window, double xoffset, double yoffset) {
 // main function
 int main(int argc, const char** argv) {
   printf("wascuzup bichs\r\n");
-  // check command-line arguments
-  if (argc!=2) {
-    std::printf(" USAGE:  basic modelfile\n");
-    return 0;
-  }
 
   // load and compile model
   char error[1000] = "Could not load binary model";
-  if (std::strlen(argv[1])>4 && !std::strcmp(argv[1]+std::strlen(argv[1])-4, ".mjb")) {
-    m = mj_loadModel(argv[1], 0);
-  } else {
-    m = mj_loadXML(argv[1], 0, error, 1000);
-  }
-  if (!m) {
+  m = mj_loadXML("/home/admin/Psyonic/ability-hand-api/URDF/mujoco/abh_left_large.xml", 0, error, 1000);
+    if (!m) {
     mju_error("Load model error: %s", error);
   }
-
   // make data
   d = mj_makeData(m);
 
