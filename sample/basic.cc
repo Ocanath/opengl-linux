@@ -98,6 +98,17 @@ void scroll(GLFWwindow* window, double xoffset, double yoffset) {
   mjv_moveCamera(m, mjMOUSE_ZOOM, 0, -0.05*yoffset, &scn, &cam);
 }
 
+void mycontroller(const mjModel * m, mjData* d)
+{
+  // if(m->nu == m->nv)
+  {
+    // d->qpos[0] = 0.5*sin(d->time);
+    for(int i = 0; i < m->nu; i++)
+    {
+      d->ctrl[i] = 101.5*sin(d->time);
+    }
+  }
+}
 
 // main function
 int main(int argc, const char** argv) {
@@ -106,11 +117,15 @@ int main(int argc, const char** argv) {
   // load and compile model
   char error[1000] = "Could not load binary model";
   m = mj_loadXML("/home/admin/Psyonic/ability-hand-api/URDF/mujoco/abh_left_large.xml", 0, error, 1000);
+  // m = mj_loadXML("/home/admin/OcanathProj/mujoco/model/humanoid/humanoid.xml", 0, error, 1000);
     if (!m) {
     mju_error("Load model error: %s", error);
   }
   // make data
   d = mj_makeData(m);
+
+
+  printf("model has %d dofs\r\n", m->nq);
 
   // init GLFW
   if (!glfwInit()) {
@@ -137,6 +152,8 @@ int main(int argc, const char** argv) {
   glfwSetCursorPosCallback(window, mouse_move);
   glfwSetMouseButtonCallback(window, mouse_button);
   glfwSetScrollCallback(window, scroll);
+
+  mjcb_control = mycontroller;
 
   // run main loop, target real-time simulation and 60 fps rendering
   while (!glfwWindowShouldClose(window)) {
