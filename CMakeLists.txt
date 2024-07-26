@@ -13,6 +13,15 @@ set(CMAKE_CXX_EXTENSIONS ON)
 set(CMAKE_POLICY_DEFAULT_CMP0072 NEW)
 
 
+enable_language(C)
+enable_language(CXX)
+
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
+
+include(MujocoOptions)
+include(MujocoDependencies)
+
+
 set(MUJOCO_HEADERS
     include/mujoco/mjdata.h
     include/mujoco/mjexport.h
@@ -50,6 +59,24 @@ add_subdirectory(src/thread)
 add_subdirectory(src/ui)
 add_subdirectory(model)
 
+target_compile_definitions(mujoco PRIVATE _GNU_SOURCE CCD_STATIC_DEFINE MUJOCO_DLL_EXPORTS -DMC_IMPLEM_ENABLE)
+if(MUJOCO_ENABLE_AVX_INTRINSICS)
+  target_compile_definitions(mujoco PUBLIC mjUSEPLATFORMSIMD)
+endif()
+
+target_compile_options(
+  mujoco
+  PRIVATE ${AVX_COMPILE_OPTIONS}
+          ${MUJOCO_MACOS_COMPILE_OPTIONS}
+          ${EXTRA_COMPILE_OPTIONS}
+          ${MUJOCO_CXX_FLAGS}
+)
+target_link_options(
+  mujoco
+  PRIVATE
+  ${MUJOCO_MACOS_LINK_OPTIONS}
+  ${EXTRA_LINK_OPTIONS}
+)
 
 target_link_libraries(
   mujoco
@@ -58,6 +85,9 @@ target_link_libraries(
           qhullstatic_r
           tinyobjloader
           tinyxml2
+)
+set_target_properties(
+  mujoco PROPERTIES VERSION "${mujoco_VERSION}" PUBLIC_HEADER "${MUJOCO_HEADERS}"
 )
 
 #######################################END IDIOCY#################################################
@@ -149,6 +179,7 @@ function(create_project_from_sources)
             "src/*.tes"
             "src/*.gs"
             "src/*.cs"
+            "src/*.cc"
     )
     set(NAME "jessescrappyworld")
     add_executable(${NAME} ${SOURCE})
