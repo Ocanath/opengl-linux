@@ -105,7 +105,10 @@ void mycontroller(const mjModel * m, mjData* d)
     // d->qpos[0] = 0.5*sin(d->time);
     for(int i = 0; i < m->nu; i++)
     {
-      d->ctrl[i] = 101.5*sin(d->time);
+      //d->ctrl[i] = 101.5*sin(d->time);
+        double qdes = 50.0 + 20*sin(d->time);
+        d->ctrl[0] = (qdes - d->qpos[7]*180./3.141592);
+        d->ctrl[4] = (-qdes - d->qpos[15] * 180. / 3.141592);
     }
   }
 }
@@ -116,7 +119,7 @@ int main(int argc, const char** argv) {
 
   // load and compile model
   char error[1000] = "Could not load binary model";
-  m = mj_loadXML("/home/admin/Psyonic/ability-hand-api/URDF/mujoco/abh_left_large.xml", 0, error, 1000);
+  m = mj_loadXML("D:/PSYONIC/Code/ability-hand-api/URDF/mujoco/abh_left_large.xml", 0, error, 1000);
   // m = mj_loadXML("/home/admin/OcanathProj/mujoco/model/humanoid/humanoid.xml", 0, error, 1000);
     if (!m) {
     mju_error("Load model error: %s", error);
