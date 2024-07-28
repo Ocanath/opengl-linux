@@ -171,7 +171,7 @@ int main()
 
     //load objects
 	AssetModel backpack(FileSystem::getPath("resources/objects/backpack/backpack.obj"));
-    AssetModel planet(FileSystem::getPath("resources/objects/planet/planet.obj"));
+    AssetModel temple(FileSystem::getPath("resources/objects/temple/samurai_monastry.obj"));
 
     //camera
     //glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom),  0.1f, 100.0f);
@@ -321,7 +321,7 @@ int main()
         hw_backpack.m[1][3] = -9.0;
         model = ht_matrix_to_mat4_t(hw_backpack);
         lightingShader.setMat4("model", model);
-        planet.Draw(lightingShader,NULL);
+        temple.Draw(lightingShader,NULL);
 
         //  // we now draw as many light bulbs as we have point lights.
         //  glBindVertexArray(lightCubeVAO);
