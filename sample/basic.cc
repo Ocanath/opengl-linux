@@ -100,15 +100,14 @@ void scroll(GLFWwindow* window, double xoffset, double yoffset) {
 
 void mycontroller(const mjModel * m, mjData* d)
 {
-  // if(m->nu == m->nv)
   {
-    // d->qpos[0] = 0.5*sin(d->time);
-    for(int i = 0; i < m->nu; i++)
+    int qposidx[] = {7,9,11,13,15,16};
+    for(int ch = 0; ch < 6; ch++)
     {
-      //d->ctrl[i] = 101.5*sin(d->time);
-        double qdes = 50.0 + 20*sin(d->time);
-        d->ctrl[0] = (qdes - d->qpos[7]*180./3.141592);
-        d->ctrl[4] = (-qdes - d->qpos[15] * 180. / 3.141592);
+        double qdes = 20.0;// + 20*sin(d->time + (double)ch);
+        if(ch == 4)
+          qdes = -qdes;
+        d->ctrl[ch] = (qdes - d->qpos[qposidx[ch]]*180./3.141592)*0.1 ;//- d->qvel[qposidx[ch]-1]*.1;
     }
   }
 }
@@ -119,7 +118,7 @@ int main(int argc, const char** argv) {
 
   // load and compile model
   char error[1000] = "Could not load binary model";
-  m = mj_loadXML("D:/PSYONIC/Code/ability-hand-api/URDF/mujoco/abh_left_large.xml", 0, error, 1000);
+  m = mj_loadXML("/home/admin/Psyonic/ability-hand-api/URDF/mujoco/abh_left_large.xml", 0, error, 1000);
   // m = mj_loadXML("/home/admin/OcanathProj/mujoco/model/humanoid/humanoid.xml", 0, error, 1000);
     if (!m) {
     mju_error("Load model error: %s", error);
@@ -127,6 +126,7 @@ int main(int argc, const char** argv) {
   // make data
   d = mj_makeData(m);
 
+  printf("has %d dofs\r\n", m->nv);
 
   printf("model has %d dofs\r\n", m->nq);
 
@@ -166,6 +166,12 @@ int main(int argc, const char** argv) {
     //  Otherwise add a cpu timer and exit this loop when it is time to render.
     mjtNum simstart = d->time;
     while (d->time - simstart < 1.0/60.0) {
+      if(d->time < 5.0)
+      {
+        d->qpos[0] = 0;
+        d->qpos[1] = 0;
+        d->qpos[2] = 1;
+      }
       mj_step(m, d);
     }
 
