@@ -100,15 +100,25 @@ void scroll(GLFWwindow* window, double xoffset, double yoffset) {
 
 void mycontroller(const mjModel * m, mjData* d)
 {
+  const char * modelname = &m->names[0];
+  if(strcmp(modelname, "ability_hand") == 0)
   {
-    int qposidx[] = {7,9,11,13,15,16};
+    // int qposidx[] = {7,9,11,13,15,16};
     for(int ch = 0; ch < 6; ch++)
     {
-        double qdes = 20.0;// + 20*sin(d->time + (double)ch);
+        double qdes = (20.0 + 50*(0.5+0.5*sin(d->time + (double)ch))) * 3.14159265/180;
         if(ch == 4)
           qdes = -qdes;
-        d->ctrl[ch] = (qdes - d->qpos[qposidx[ch]]*180./3.141592)*0.1 ;//- d->qvel[qposidx[ch]-1]*.1;
+        d->ctrl[ch] = qdes;
     }
+  }
+  else if (strcmp(modelname, "hexapod") == 0)
+  {
+    d->ctrl[2] = (sin(d->time)*0.5+0.5)*20*3.14159265/180;
+  }
+  else
+  {
+    printf("fugg\r\n");
   }
 }
 
@@ -119,6 +129,7 @@ int main(int argc, const char** argv) {
   // load and compile model
   char error[1000] = "Could not load binary model";
   m = mj_loadXML("/home/admin/Psyonic/ability-hand-api/URDF/mujoco/abh_left_large.xml", 0, error, 1000);
+    // m = mj_loadXML("/home/admin/OcanathProj/CAD/hexapod-cad/mujoco/hexapod.xml",0,error,1000);
   // m = mj_loadXML("/home/admin/OcanathProj/mujoco/model/humanoid/humanoid.xml", 0, error, 1000);
     if (!m) {
     mju_error("Load model error: %s", error);
@@ -129,6 +140,24 @@ int main(int argc, const char** argv) {
   printf("has %d dofs\r\n", m->nv);
 
   printf("model has %d dofs\r\n", m->nq);
+
+
+  printf("model name: %s\r\n",&m->names[0]);
+  printf("Joint names:\r\n");
+  for(int i = 0; i < m->njnt; i++)
+  {
+    printf("    %s\r\n", &m->names[m->name_jntadr[i]]);
+  }
+  printf("Actuator names:\r\n");
+  for(int i = 0; i < m->nu; i++)
+  {
+    printf("    %s\r\n", &m->names[m->name_actuatoradr[i]]);
+  }
+
+  if(strcmp( ((const char *)&m->names[0]), "hexapod") == 0  )
+  {
+    
+  }
 
   // init GLFW
   if (!glfwInit()) {
@@ -166,12 +195,6 @@ int main(int argc, const char** argv) {
     //  Otherwise add a cpu timer and exit this loop when it is time to render.
     mjtNum simstart = d->time;
     while (d->time - simstart < 1.0/60.0) {
-      if(d->time < 5.0)
-      {
-        d->qpos[0] = 0;
-        d->qpos[1] = 0;
-        d->qpos[2] = 1;
-      }
       mj_step(m, d);
     }
 
