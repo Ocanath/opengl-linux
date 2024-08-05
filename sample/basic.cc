@@ -16,7 +16,11 @@
 #include <cstring>
 
 #include <GLFW/glfw3.h>
+#include "dynahex.h"
 #include <mujoco/mujoco.h>
+#include "sin-math.h"
+#include "hexapod_footpath.h"
+#include "vect.h"
 
 // MuJoCo data structures
 mjModel* m = NULL;                  // MuJoCo model
@@ -98,6 +102,9 @@ void scroll(GLFWwindow* window, double xoffset, double yoffset) {
   mjv_moveCamera(m, mjMOUSE_ZOOM, 0, -0.05*yoffset, &scn, &cam);
 }
 
+dynahex_t hexapod;
+
+
 void mycontroller(const mjModel * m, mjData* d)
 {
   const char * modelname = &m->names[0];
@@ -114,7 +121,60 @@ void mycontroller(const mjModel * m, mjData* d)
   }
   else if (strcmp(modelname, "hexapod") == 0)
   {
-    d->ctrl[2] = (sin(d->time)*0.5+0.5)*20*3.14159265/180;
+      //for (int i = 0; i < m->nu; i++)
+      //{
+      //    d->ctrl[2] = 0;
+      //}
+    //d->ctrl[2] =(40+ (sin(d->time)*0.5+0.5)*20)*3.14159265/180;
+        vect3_t foot_xy_1;
+        float h = 40; float w = 100;
+        float period = 2.f;
+        foot_path(d->time, h, w, period, &foot_xy_1);
+
+        vect3_t foot_xy_2;
+        foot_path(d->time + period / 2.f, h, w, period, &foot_xy_2);
+
+
+        /*Rotate and translate*/
+        float forward_direction_angle = 0.f;	//y axis!
+        mat4_t xrot = Hx(HALF_PI);
+        mat4_t zrot = Hz(forward_direction_angle - HALF_PI);
+        vect3_t tmp;
+        htmatrix_vect3_mult(&xrot, &foot_xy_1, &tmp);
+        htmatrix_vect3_mult(&zrot, &tmp, &foot_xy_1);	//done 1
+        htmatrix_vect3_mult(&xrot, &foot_xy_2, &tmp);
+        htmatrix_vect3_mult(&zrot, &tmp, &foot_xy_2);	//done 2
+
+
+        //			int leg = 0;
+        for (int leg = 0; leg < NUM_LEGS; leg++)
+        {
+            mat4_t lrot = Hz((TWO_PI / 6.f) * (float)leg);
+            vect3_t o_motion_b = { { 270.f,0.f,-270.f } };
+            htmatrix_vect3_mult(&lrot, &o_motion_b, &tmp);
+            o_motion_b = tmp;
+
+            vect3_t targ_b;
+            for (int i = 0; i < 3; i++)
+            {
+                if (leg % 2 == 0)
+                {
+                    targ_b.v[i] = foot_xy_1.v[i] + o_motion_b.v[i];
+                }
+                else
+                {
+                    targ_b.v[i] = foot_xy_2.v[i] + o_motion_b.v[i];
+                }
+            }
+
+            mat4_t* hb_0 = &hexapod.leg[leg].chain[0].him1_i;
+            joint* start = &hexapod.leg[leg].chain[1];
+            //joint* end = &hexapod.leg[leg].chain[3];
+            //vect3_t zero = { {0,0,0} };
+            //vect3_t anchor_b;
+            //gd_ik_single(hb_0, start, end, &zero, &targ_b, &anchor_b, 20000.f);
+            ik_closedform_hexapod(hb_0, start, &targ_b);
+      }
   }
   else
   {
@@ -128,7 +188,8 @@ int main(int argc, const char** argv) {
 
   // load and compile model
   char error[1000] = "Could not load binary model";
-  m = mj_loadXML("/home/admin/Psyonic/ability-hand-api/URDF/mujoco/abh_left_large.xml", 0, error, 1000);
+  // m = mj_loadXML("/home/admin/Psyonic/ability-hand-api/URDF/mujoco/abh_left_large.xml", 0, error, 1000);
+  m = mj_loadXML("D:\\OcanathProj\\CAD\\hexapod\\mujoco\\hexapod.xml", 0, error, 1000);
     // m = mj_loadXML("/home/admin/OcanathProj/CAD/hexapod-cad/mujoco/hexapod.xml",0,error,1000);
   // m = mj_loadXML("/home/admin/OcanathProj/mujoco/model/humanoid/humanoid.xml", 0, error, 1000);
     if (!m) {
@@ -184,6 +245,15 @@ int main(int argc, const char** argv) {
   glfwSetCursorPosCallback(window, mouse_move);
   glfwSetMouseButtonCallback(window, mouse_button);
   glfwSetScrollCallback(window, scroll);
+
+  init_dynahex_kinematics(&hexapod);
+  for (int leg = 0; leg < 6; leg++)
+  {
+      joint* j = hexapod.leg[leg].chain;
+      j[1].q = 0;
+      j[2].q = PI / 2;
+      j[3].q = 0;
+  }
 
   mjcb_control = mycontroller;
 
