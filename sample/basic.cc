@@ -16,8 +16,8 @@
 #include <cstring>
 
 #include <GLFW/glfw3.h>
-#include "dynahex.h"
 #include <mujoco/mujoco.h>
+#include "dynahex.h"
 #include "sin-math.h"
 #include "hexapod_footpath.h"
 #include "vect.h"
@@ -169,11 +169,24 @@ void mycontroller(const mjModel * m, mjData* d)
 
             mat4_t* hb_0 = &hexapod.leg[leg].chain[0].him1_i;
             joint* start = &hexapod.leg[leg].chain[1];
-            //joint* end = &hexapod.leg[leg].chain[3];
-            //vect3_t zero = { {0,0,0} };
-            //vect3_t anchor_b;
-            //gd_ik_single(hb_0, start, end, &zero, &targ_b, &anchor_b, 20000.f);
             ik_closedform_hexapod(hb_0, start, &targ_b);
+            for (int leg = 0; leg < NUM_LEGS; leg++)
+            {
+                joint* j = &hexapod.leg[leg].chain[1];
+                j->child->q += 10.0*PI/180.0;
+            }
+
+            int pld_idx = 0;
+		    for(int leg = 0; leg < NUM_LEGS; leg++)
+		    {
+			    joint * j = &hexapod.leg[leg].chain[1];
+			    for(int i = 0; i < 3; i++)
+			    {
+				    d->ctrl[pld_idx++] = j->q;
+				    j = j->child;
+			    }
+		    }
+
       }
   }
   else

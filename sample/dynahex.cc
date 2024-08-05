@@ -1,6 +1,6 @@
 #include "dynahex.h"
 #include "vect.h"
-
+#include <math.h>
 
 
 const dh_entry hexleg_dh[NUM_FRAMES_HEXLEG] = {

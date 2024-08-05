@@ -8,6 +8,7 @@
 
 
 #include "kinematics.h"
+#include <string.h>
 //#include "m_mcpy.h"
 
 /*
