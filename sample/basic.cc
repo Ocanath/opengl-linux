@@ -623,69 +623,78 @@ void mycontroller(const mjModel * m, mjData* d)
     }
   }
   else if (strcmp(modelname, "hexapod") == 0)
-  {
-      //for (int i = 0; i < m->nu; i++)
-      //{
-      //    d->ctrl[2] = 0;
-      //}
-    //d->ctrl[2] =(40+ (sin(d->time)*0.5+0.5)*20)*3.14159265/180;
-        vect3_t foot_xy_1;
-        float h = 40; float w = 100;
-        float period = 2.f;
-        foot_path(d->time, h, w, period, &foot_xy_1);
+  {  
+    vect3_t foot_xy_1;
+    float h = 40; float w = 100;
+    float period = 4;
+    foot_path(d->time, h, w, period, &foot_xy_1);
 
-        vect3_t foot_xy_2;
-        foot_path(d->time + period / 2.f, h, w, period, &foot_xy_2);
+    vect3_t foot_xy_2;
+    foot_path(d->time + period / 2.f, h, w, period, &foot_xy_2);
 
 
-        /*Rotate and translate*/
-        float forward_direction_angle = 0.f;	//y axis!
-        mat4_t xrot = Hx(HALF_PI);
-        mat4_t zrot = Hz(forward_direction_angle - HALF_PI);
-        vect3_t tmp;
-        htmatrix_vect3_mult(&xrot, &foot_xy_1, &tmp);
-        htmatrix_vect3_mult(&zrot, &tmp, &foot_xy_1);	//done 1
-        htmatrix_vect3_mult(&xrot, &foot_xy_2, &tmp);
-        htmatrix_vect3_mult(&zrot, &tmp, &foot_xy_2);	//done 2
+    /*Rotate and translate*/
+    float forward_direction_angle = 0.f;	//y axis!
+    mat4_t xrot = Hx(HALF_PI);
+    mat4_t zrot = Hz(forward_direction_angle - HALF_PI);
+    vect3_t tmp;
+    htmatrix_vect3_mult(&xrot, &foot_xy_1, &tmp);
+    htmatrix_vect3_mult(&zrot, &tmp, &foot_xy_1);	//done 1
+    htmatrix_vect3_mult(&xrot, &foot_xy_2, &tmp);
+    htmatrix_vect3_mult(&zrot, &tmp, &foot_xy_2);	//done 2
 
 
-        //			int leg = 0;
-        for (int leg = 0; leg < NUM_LEGS; leg++)
+    //			int leg = 0;
+    for (int leg = 0; leg < NUM_LEGS; leg++)
+    {
+        mat4_t lrot = Hz((TWO_PI / 6.f) * (float)leg);
+        vect3_t o_motion_b = { { 270.f,0.f,-270.f } };
+        htmatrix_vect3_mult(&lrot, &o_motion_b, &tmp);
+        o_motion_b = tmp;
+
+        vect3_t targ_b;
+        for (int i = 0; i < 3; i++)
         {
-            mat4_t lrot = Hz((TWO_PI / 6.f) * (float)leg);
-            vect3_t o_motion_b = { { 270.f,0.f,-270.f } };
-            htmatrix_vect3_mult(&lrot, &o_motion_b, &tmp);
-            o_motion_b = tmp;
-
-            vect3_t targ_b;
-            for (int i = 0; i < 3; i++)
+            if (leg % 2 == 0)
             {
-                if (leg % 2 == 0)
-                {
-                    targ_b.v[i] = foot_xy_1.v[i] + o_motion_b.v[i];
-                }
-                else
-                {
-                    targ_b.v[i] = foot_xy_2.v[i] + o_motion_b.v[i];
-                }
+                targ_b.v[i] = foot_xy_1.v[i] + o_motion_b.v[i];
             }
-
-            mat4_t* hb_0 = &hexapod.leg[leg].chain[0].him1_i;
-            joint* start = &hexapod.leg[leg].chain[1];
-            ik_closedform_hexapod(hb_0, start, &targ_b);
-            // printf("%f\r\n", d->ctrl[0]*180/PI);
-      }
-      
-      int ctrl_idx = 0;
-      for(int leg = 0; leg < NUM_LEGS; leg++)
-      {
-        joint * j = &hexapod.leg[leg].chain[1];
-        for(int i = 0; i < 3; i++)
-        {
-            d->ctrl[ctrl_idx++] = j->q;
-            j = j->child;
+            else
+            {
+                targ_b.v[i] = foot_xy_2.v[i] + o_motion_b.v[i];
+            }
         }
+
+        mat4_t* hb_0 = &hexapod.leg[leg].chain[0].him1_i;
+        joint* start = &hexapod.leg[leg].chain[1];
+        ik_closedform_hexapod(hb_0, start, &targ_b);
+        start->child->q = wrap_2pi(-start->child->q + 1.72);
+        // start->child->child->q = wrap_2pi(start->child->child->q + 3.05);
+        // printf("%f\r\n", d->ctrl[0]*180/PI);
+    }
+
+
+    
+    // for(int leg = 0; leg < NUM_LEGS; leg++)
+    // {
+    //   joint * j = &hexapod.leg[leg].chain[1];
+    //   j->q = 0;
+    //   j->child->q = wrap_2pi(0 + 1.72);
+    //   // j->child->child->q = wrap_2pi(0 + 3.05);
+    //   j->child->child->q = -(sin(d->time)*0.5+0.5)*HALF_PI+3.05;
+    // }
+
+
+    int ctrl_idx = 0;
+    for(int leg = 0; leg < NUM_LEGS; leg++)
+    {
+      joint * j = &hexapod.leg[leg].chain[1];
+      for(int i = 0; i < 3; i++)
+      {
+          d->ctrl[ctrl_idx++] = j->q;
+          j = j->child;
       }
+    }
   }
   else
   {
@@ -709,6 +718,7 @@ int main(int argc, const char** argv) {
   // make data
   d = mj_makeData(m);
 
+
   printf("has %d dofs\r\n", m->nv);
 
   printf("model has %d dofs\r\n", m->nq);
@@ -728,7 +738,7 @@ int main(int argc, const char** argv) {
 
   if(strcmp( ((const char *)&m->names[0]), "hexapod") == 0  )
   {
-    
+
   }
 
   // init GLFW
@@ -777,8 +787,30 @@ int main(int argc, const char** argv) {
     //  Otherwise add a cpu timer and exit this loop when it is time to render.
     mjtNum simstart = d->time;
     while (d->time - simstart < 1.0/60.0) {
+      d->qpos[0] = 0;
+      d->qpos[1] = 0;
+      d->qpos[2] = 0.5;
+
+      d->qpos[3] = 0;
+      d->qpos[4] = 0;
+      d->qpos[5] = 0;
+      d->qpos[6] = 1;
+      
       mj_step(m, d);
     }
+
+    // int base = mj_name2id(m,mjOBJ_BODY,"base");
+    // double x = d->xpos[base*3];
+    // double y = d->xpos[base*3+1];
+    // double z = d->xpos[base*3+2];
+    // printf("%f,%f,%f\r\n",x,y,z);
+
+    int actid = mj_name2id(m, mjOBJ_ACTUATOR, "l1_act2");
+    int jointid = mj_name2id(m, mjOBJ_JOINT, "leg1_q2");
+    jointid = m->jnt_qposadr[jointid];
+    printf("%f, %f\r\n",d->ctrl[actid], d->qpos[jointid]);
+    
+
 
     // get framebuffer viewport
     mjrRect viewport = {0, 0, 0, 0};
