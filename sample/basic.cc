@@ -608,6 +608,49 @@ void htmatrix_vect3_mult(mat4_t* m, vect3_t* v, vect3_t* ret)
 dynahex_t hexapod;
 
 
+/*
+* TODO TEST THIS FUNCTION
+* Transforms a NORMALIZED quaternion to a rotation matrix
+*/
+mat4_t quat_to_mat4_t(vect4_t quat, vect3_t origin)
+{
+	mat4_t m;
+	float q1 = quat.v[0];
+	float q2 = quat.v[1];
+	float q3 = quat.v[2];
+	float q4 = quat.v[3];
+
+	float qq1 = q1 * q1;
+	float qq2 = q2 * q2;
+	float qq3 = q3 * q3;
+	float qq4 = q4 * q4;
+
+	float q2q3 = q2 * q3;
+	float q1q2 = q1 * q2;
+	float q1q3 = q1 * q3;
+	float q1q4 = q1 * q4;
+	float q2q4 = q2 * q4;
+	float q3q4 = q3 * q4;
+
+	m.m[0][0] = qq1 + qq2 - qq3 - qq4;
+	m.m[0][1] = 2.0f * (q2q3 - q1q4);
+	m.m[0][2] = 2.0f * (q2q4 + q1q3);
+	m.m[1][0] = 2.0f * (q2q3 + q1q4);
+	m.m[1][1] = qq1 - qq2 + qq3 - qq4;
+	m.m[1][2] = 2.0f * (q3q4 - q1q2);
+	m.m[2][0] = 2.0f * (q2q4 - q1q3);
+	m.m[2][1] = 2.0f * (q3q4 + q1q2);
+	m.m[2][2] = qq1 - qq2 - qq3 + qq4;
+
+	for (int r = 0; r < 3; r++)
+		m.m[r][3] = origin.v[r];
+	for (int c = 0; c < 3; c++)
+		m.m[3][c] = 0;
+	m.m[3][3] = 1.0f;
+	return m;
+}
+
+
 void mycontroller(const mjModel * m, mjData* d)
 {
   const char * modelname = &m->names[0];
@@ -668,22 +711,22 @@ void mycontroller(const mjModel * m, mjData* d)
         mat4_t* hb_0 = &hexapod.leg[leg].chain[0].him1_i;
         joint* start = &hexapod.leg[leg].chain[1];
         ik_closedform_hexapod(hb_0, start, &targ_b);
-        start->child->q = wrap_2pi(-start->child->q + 1.72);
-        // start->child->child->q = wrap_2pi(start->child->child->q + 3.05);
+		forward_kinematics_dynahexleg(&hexapod);
+        start->child->q = (-start->child->q + 1.39313132679);
+        start->child->child->q = (start->child->child->q + 1.443345-HALF_PI);
         // printf("%f\r\n", d->ctrl[0]*180/PI);
     }
 
-
+	
     
     // for(int leg = 0; leg < NUM_LEGS; leg++)
     // {
     //   joint * j = &hexapod.leg[leg].chain[1];
     //   j->q = 0;
-    //   j->child->q = wrap_2pi(0 + 1.72);
-    //   // j->child->child->q = wrap_2pi(0 + 3.05);
-    //   j->child->child->q = -(sin(d->time)*0.5+0.5)*HALF_PI+3.05;
+	   //j->child->q = 1.39313132679;// wrap_2pi(0 + 1.72);
+	   //j->child->child->q = 1.443345;// -(sin(d->time) * 0.5 + 0.5) * HALF_PI + 3.05;
     // }
-
+	 //hexapod.leg[0].chain[1].child->q = sin(d->time);
 
     int ctrl_idx = 0;
     for(int leg = 0; leg < NUM_LEGS; leg++)
@@ -709,8 +752,8 @@ int main(int argc, const char** argv) {
   // load and compile model
   char error[1000] = "Could not load binary model";
   // m = mj_loadXML("/home/admin/Psyonic/ability-hand-api/URDF/mujoco/abh_left_large.xml", 0, error, 1000);
-  // m = mj_loadXML("D:\\OcanathProj\\CAD\\hexapod\\mujoco\\hexapod.xml", 0, error, 1000);
-    m = mj_loadXML("/home/admin/OcanathProj/CAD/hexapod-cad/mujoco/hexapod.xml",0,error,1000);
+   m = mj_loadXML("D:\\OcanathProj\\CAD\\hexapod\\mujoco\\hexapod.xml", 0, error, 1000);
+    //m = mj_loadXML("/home/admin/OcanathProj/CAD/hexapod-cad/mujoco/hexapod.xml",0,error,1000);
   // m = mj_loadXML("/home/admin/OcanathProj/mujoco/model/humanoid/humanoid.xml", 0, error, 1000);
     if (!m) {
     mju_error("Load model error: %s", error);
@@ -718,6 +761,32 @@ int main(int argc, const char** argv) {
   // make data
   d = mj_makeData(m);
 
+
+  
+
+  int bodyID = mj_name2id(m, mjOBJ_BODY, "leg1_link3");
+  printf("%d, ", bodyID);
+  vect4_t quat;
+  for (int i = 0; i < 4; i++)
+	  quat.v[i] = m->body_quat[bodyID+i];
+  vect3_t pos;
+  for (int i = 0; i < 3; i++)
+	  pos.v[i] = m->body_pos[bodyID+i];
+  mat4_t leg1h2_3 = quat_to_mat4_t(quat, pos);
+  int parent = m->body_parentid[bodyID];
+  if (parent != -1)
+	  printf("parent = %s\r\n", (const char *)&m->names[m->name_bodyadr[parent]]);
+  else
+	  printf("no parent...\r\n");
+
+  //todo: use the above model data to load up a kinematic tree
+  //biggest problem: documentation does not make a DFS tree traversal very apparent.
+  double o_axis[3] = { -0.0177556, 0.0988847, 0.0333596 };
+  double angle_offset_q2 = atan2(-o_axis[0], o_axis[1] );
+  printf("add %f to q2. in deg %f\r\n", angle_offset_q2, angle_offset_q2*180/3.14159265);
+  double o_foottip[3] = { 0.027181, -0.212110, 0.031520 };
+  double angle_offset_q3 = atan2(o_foottip[1], o_foottip[0]);
+  printf("subtract %f from q3, in deg %f\r\n", angle_offset_q3, angle_offset_q3 * 180 / 3.14159265);
 
   printf("has %d dofs\r\n", m->nv);
 
@@ -787,17 +856,59 @@ int main(int argc, const char** argv) {
     //  Otherwise add a cpu timer and exit this loop when it is time to render.
     mjtNum simstart = d->time;
     while (d->time - simstart < 1.0/60.0) {
-      d->qpos[0] = 0;
-      d->qpos[1] = 0;
-      d->qpos[2] = 0.5;
+      //d->qpos[0] = 0;
+      //d->qpos[1] = 0;
+      //d->qpos[2] = 0.5;
 
-      d->qpos[3] = 0;
-      d->qpos[4] = 0;
-      d->qpos[5] = 0;
-      d->qpos[6] = 1;
-      
+      //d->qpos[3] = 0;
+      //d->qpos[4] = 0;
+      //d->qpos[5] = 0;
+      //d->qpos[6] = 1;
+      //
       mj_step(m, d);
     }
+
+
+	//int bodyID = mj_name2id(m, mjOBJ_BODY, "leg1_link3");
+	//vect4_t quat;
+	//for (int i = 0; i < 4; i++)
+	//	quat.v[i] = m->body_quat[bodyID*4 + i];
+	//vect3_t pos;
+	//for (int i = 0; i < 3; i++)
+	//	pos.v[i] = m->body_pos[bodyID*3 + i];
+	//mat4_t leg1h2_3 = quat_to_mat4_t(quat, pos);
+	//int jointid = mj_name2id(m, mjOBJ_JOINT, "leg1_q2");
+	//int qposid = m->jnt_qposadr[jointid];
+	//mat4_t h2_3 = mat4_t_mult(Hz(d->qpos[qposid]), leg1h2_3);
+	//
+	//printf("%d, ", bodyID);
+	//printf("h2_3 = \r\n");
+	//for (int r = 0; r < 4; r++)
+	//{
+	//	printf("    ");
+	//	for (int c = 0; c < 4; c++)
+	//	{
+	//		if (c < 3)
+	//			printf("%f, ", h2_3.m[r][c]);
+	//		else
+	//			printf("%f", h2_3.m[r][c] * 1000.0);
+	//	}
+	//	printf("\r\n");
+	//}
+	//printf("\r\n");
+
+
+
+
+	//int bodyID = mj_name2id(m, mjOBJ_BODY, "leg1_link3");
+	//vect4_t quat;
+	//for (int i = 0; i < 4; i++)
+	//	quat.v[i] = d->xquat[bodyID*4 + i];
+	//vect3_t pos;
+	//for (int i = 0; i < 3; i++)
+	//	pos.v[i] = d->xpos[bodyID*3 + i];
+	//printf("%f, %f, %f\r\n", pos.v[0]*1000, pos.v[1]*1000, pos.v[2]*1000);
+
 
     // int base = mj_name2id(m,mjOBJ_BODY,"base");
     // double x = d->xpos[base*3];
@@ -805,10 +916,10 @@ int main(int argc, const char** argv) {
     // double z = d->xpos[base*3+2];
     // printf("%f,%f,%f\r\n",x,y,z);
 
-    int actid = mj_name2id(m, mjOBJ_ACTUATOR, "l1_act2");
-    int jointid = mj_name2id(m, mjOBJ_JOINT, "leg1_q2");
-    jointid = m->jnt_qposadr[jointid];
-    printf("%f, %f\r\n",d->ctrl[actid], d->qpos[jointid]);
+    //int actid = mj_name2id(m, mjOBJ_ACTUATOR, "l1_act2");
+    //int jointid = mj_name2id(m, mjOBJ_JOINT, "leg1_q2");
+    //jointid = m->jnt_qposadr[jointid];
+    //printf("%f, %f\r\n",d->ctrl[actid], d->qpos[jointid]);
     
 
 
