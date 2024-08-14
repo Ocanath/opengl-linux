@@ -681,8 +681,12 @@ void mycontroller(const mjModel * m, mjData* d)
     //   j->q = 0;
     //   j->child->q = wrap_2pi(0 + 1.72);
     //   // j->child->child->q = wrap_2pi(0 + 3.05);
-    //   j->child->child->q = -(sin(d->time)*0.5+0.5)*HALF_PI+3.05;
+    //   j->child->child->q = HALF_PI+3.05;
     // }
+
+    // float t = fmod(d->time, 6);
+    // int lg = (int)t;
+    // hexapod.leg[lg].chain[1].q = sin(d->time);
 
 
     int ctrl_idx = 0;
@@ -787,14 +791,14 @@ int main(int argc, const char** argv) {
     //  Otherwise add a cpu timer and exit this loop when it is time to render.
     mjtNum simstart = d->time;
     while (d->time - simstart < 1.0/60.0) {
-      d->qpos[0] = 0;
-      d->qpos[1] = 0;
-      d->qpos[2] = 0.5;
+      // d->qpos[0] = 0;
+      // d->qpos[1] = 0;
+      // d->qpos[2] = 0.5;
 
-      d->qpos[3] = 0;
-      d->qpos[4] = 0;
-      d->qpos[5] = 0;
-      d->qpos[6] = 1;
+      // d->qpos[3] = 0;
+      // d->qpos[4] = 0;
+      // d->qpos[5] = 0;
+      // d->qpos[6] = 1;
       
       mj_step(m, d);
     }
