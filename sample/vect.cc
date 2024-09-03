@@ -60,7 +60,7 @@ void mat4_t_mult_pbr(mat4_t * m1, mat4_t * m2, mat4_t * ret)
 	{
 		for (out_c = 0; out_c < dim; out_c++)
 		{
-			float tmp = 0;
+			double tmp = 0;
 			for (i = 0; i < dim; i++)
 			{
 				tmp = tmp + m1->m[out_r][i] * m2->m[i][out_c];
@@ -78,7 +78,7 @@ void mat4_t_mult_pbr(mat4_t * m1, mat4_t * m2, mat4_t * ret)
 void ht_mat4_mult_pbr(mat4_t * m1, mat4_t * m2, mat4_t * ret)
 {
 	int r, c, i;
-	float tmp;
+	double tmp;
 	for(r = 0; r < 3; r++)
 	{
 		for(c = 0; c < 4; c++)
@@ -110,8 +110,8 @@ void cross_pbr(vect3_t * v_a, vect3_t * v_b, vect3_t * ret)
 /*Loads rotation about coordinate. 0 = identity*/
 mat4_t Hz(double angle)
 {
-	float cth = cos(angle);
-	float sth = sin(angle);
+	double cth = cos(angle);
+	double sth = sin(angle);
 	mat4_t r;
 	r.m[0][0] = cth;		r.m[0][1] = -sth;		r.m[0][2] = 0;	r.m[0][3] = 0;
 	r.m[1][0] = sth;		r.m[1][1] = cth;		r.m[1][2] = 0;	r.m[1][3] = 0;
@@ -121,7 +121,7 @@ mat4_t Hz(double angle)
 }
 
 /*returns homogeneous transform mat4_t matrix which is the rotation 'analge' around the x axis */
-mat4_t Hx(float angle)
+mat4_t Hx(double angle)
 {
 	mat4_t ret;
 	ret.m[0][0] = 1;	ret.m[0][1] = 0;				ret.m[0][2] = 0;				ret.m[0][3] = 0;
@@ -132,7 +132,7 @@ mat4_t Hx(float angle)
 }
 
 /*Returns rotation about coordinate. 0 = identity*/
-mat4_t Hy(float angle)
+mat4_t Hy(double angle)
 {
 	mat4_t ret;
 	ret.m[0][0] = cos_fast(angle);	ret.m[0][1] = 0;	ret.m[0][2] = sin_fast(angle);	ret.m[0][3] = 0;
@@ -152,7 +152,7 @@ vect6_t vect6_add(vect6_t v_a, vect6_t v_b)
 }
 
 /*Multiples vector v_a by scalar scale*/
-vect3_t vect3_scale(vect3_t v_a, float scale)
+vect3_t vect3_scale(vect3_t v_a, double scale)
 {
 	vect3_t ret; int i;
 	for (i = 0; i<3; i++)
@@ -161,7 +161,7 @@ vect3_t vect3_scale(vect3_t v_a, float scale)
 }
 
 /*Multiples vector v_a by scalar scale*/
-vect6_t vect6_scale(vect6_t v_a, float scale)
+vect6_t vect6_scale(vect6_t v_a, double scale)
 {
 	vect6_t ret; int i;
 	for (i = 0; i<6; i++)
@@ -181,18 +181,18 @@ float Q_rsqrt(float number)
 
 
 /**/
-float inverse_vect_mag(float* v, int n)
+double inverse_vect_mag(double* v, int n)
 {
-	float v_dot_v= 0.f;
+	double v_dot_v= 0.f;
 	for (int i = 0; i < n; i++)
 		v_dot_v += v[i] * v[i];
 	return 1/sqrt(v_dot_v);
 }
 
 /**/
-void vect_normalize(float* v, int n)
+void vect_normalize(double* v, int n)
 {
-	float inv_mag = inverse_vect_mag(v,n);
+	double inv_mag = inverse_vect_mag(v,n);
 	for (int i = 0; i < n; i++)
 	{
 		v[i] = v[i] * inv_mag;
@@ -200,9 +200,9 @@ void vect_normalize(float* v, int n)
 }
 
 /*Dot product. floating point*/
-float vect_dot(float* v1, float* v2, int n)
+double vect_dot(double* v1, double* v2, int n)
 {
-	float res = 0.f;
+	double res = 0.f;
 	for (int i = 0; i < n; i++)
 	{
 		res += v1[i] * v2[i];

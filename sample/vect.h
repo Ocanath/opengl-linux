@@ -9,7 +9,7 @@
 #define INC_VECT_H_
 #include <stdint.h>
 
-typedef float vect3[3];
+typedef double vect3[3];
 typedef struct vect3_t
 {
 	vect3 v;
@@ -18,20 +18,20 @@ typedef struct vect3_t
 /*
 homogeneous transformation matrix vectors (lol)
 */
-typedef float vect4[4];
+typedef double vect4[4];
 typedef struct vect4_t
 {
 	vect4 v;
 }vect4_t;
 
 
-typedef float vect6[6];
+typedef double vect6[6];
 typedef struct vect6_t
 {
 	vect6 v;
 }vect6_t;
 
-typedef float mat3[3][3];	//	Array wrapper for unambiguous pointer to 2d array
+typedef double mat3[3][3];	//	Array wrapper for unambiguous pointer to 2d array
 typedef struct mat3_t		//	Rotation matrices, skew symmetric matrices take this type
 {
 	mat3 m;
@@ -43,7 +43,7 @@ typedef struct mat4_t			//homogeneous transformation matrices take this type. Al
 	mat4 m;
 }mat4_t;
 
-typedef float mat6[6][6];
+typedef double mat6[6][6];
 typedef struct mat6_t
 {
 	mat6 m;
@@ -88,20 +88,20 @@ mat4_t mat4_t_mult(mat4_t m1, mat4_t m2);
 void mat4_t_mult_pbr(mat4_t * m1, mat4_t * m2, mat4_t * ret);
 void cross_pbr(vect3_t * v_a, vect3_t * v_b, vect3_t * ret);
 mat4_t Hz(double angle);
-mat4_t Hy(float angle);
-mat4_t Hx(float angle);
+mat4_t Hy(double angle);
+mat4_t Hx(double angle);
 void ht_mat4_mult_pbr(mat4_t * m1, mat4_t * m2, mat4_t * ret);
 
 void ht32_mult_pbr(mat4_32b_t * m1, mat4_32b_t * m2, mat4_32b_t * ret);
 void cross32_pbr(vect3_32b_t * v_a, vect3_32b_t * v_b, vect3_32b_t * ret, int n);
 void ht32_mult64_pbr(mat4_32b_t * m1, mat4_32b_t * m2, mat4_32b_t * ret, int n);
 
-float vect_dot(float* v1, float* v2, int n);
+double vect_dot(double* v1, double* v2, int n);
 vect6_t vect6_add(vect6_t v_a, vect6_t v_b);
 /*Multiples vector v_a by scalar scale*/
-vect6_t vect6_scale(vect6_t v_a, float scale);
-vect3_t vect3_scale(vect3_t v_a, float scale);
-void vect_normalize(float* v, int n);
+vect6_t vect6_scale(vect6_t v_a, double scale);
+vect3_t vect3_scale(vect3_t v_a, double scale);
+void vect_normalize(double* v, int n);
 
 mat4_32b_t Hy_nb(int32_t angle, int n);
 mat4_32b_t Hx_nb(int32_t angle, int n);
