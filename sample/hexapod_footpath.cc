@@ -1,6 +1,7 @@
 #include "trig_fixed.h"
 #include "sin-math.h"
 #include "hexapod_footpath.h"
+#include <math.h>
 
 /*Computes the piecewise parametric function to create a footpath.
 *
@@ -41,10 +42,10 @@ void foot_path(float time, float h, float w, float period, vect3_t* v)
 			Consequence for smoother motion is that the footspeed is much higher in the middle of the motion
 		*/
 		for(int i = 0; i < 1; i++)	//the more iterations of this you run, the more like a step function this becomes.
-			t = sin_fast(HALF_PI * t);
+			t = sin(HALF_PI * t);
 
 		v->v[0] = -t * w / 2.f;
-		//v->v[0] = -sin_fast(t)*sin_fast(t + HALF_PI) * 2.199f * (w / 2.f);
+		//v->v[0] = -sin(t)*sin(t + HALF_PI) * 2.199f * (w / 2.f);
 		v->v[1] = (-t*t + 1) * h;
 		v->v[2] = 0;
 	}

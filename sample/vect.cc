@@ -6,6 +6,7 @@
  */
 #include "vect.h"
 #include "sin-math.h"
+#include <math.h>
 
 /*returns the inverse of a homogeneous transform type mat4_t matrix*/
 void ht_inverse_ptr(mat4_t * hin, mat4_t * hout)
@@ -185,7 +186,7 @@ float inverse_vect_mag(float* v, int n)
 	float v_dot_v= 0.f;
 	for (int i = 0; i < n; i++)
 		v_dot_v += v[i] * v[i];
-	return Q_rsqrt(v_dot_v);
+	return 1/sqrt(v_dot_v);
 }
 
 /**/

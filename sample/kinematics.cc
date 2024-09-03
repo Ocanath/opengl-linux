@@ -9,6 +9,7 @@
 
 #include "kinematics.h"
 #include <string.h>
+#include <math.h>
 //#include "m_mcpy.h"
 
 /*
@@ -87,8 +88,8 @@ void init_forward_kinematics_dh(joint* j, const dh_entry* dh, int num_joints)
 {
 	for (int i = 1; i <= num_joints; i++)
 	{
-		float sin_alpha = sin_fast(dh[i].alpha);
-		float cos_alpha = cos_fast(dh[i].alpha);
+		float sin_alpha = sin(dh[i].alpha);
+		float cos_alpha = cos(dh[i].alpha);
 		/*Precomputed Hd*Ha*Halpha*/
 		mat4_t link = {
 			{
@@ -115,8 +116,8 @@ void load_q(joint* chain_start)
 	joint* j = chain_start;
 	while (j != NULL)
 	{
-		j->sin_q = sin_fast(j->q);
-		j->cos_q = cos_fast(j->q);
+		j->sin_q = sin(j->q);
+		j->cos_q = cos(j->q);
 
 		j = j->child;
 	}

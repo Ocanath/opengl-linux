@@ -139,9 +139,7 @@ void ik_closedform_hexapod(mat4_t * hb_0, joint * start, vect3_t * targ_b)
 		targ_0_offset.v[i] *= -7.5f;	//the y offset when the arm is in q={0,0,0}
 
 	//final q1 result, load it into kinematic structure
-	start->q = (atan2_approx(targ_0.v[1] - targ_0_offset.v[1], targ_0.v[0] - targ_0_offset.v[0]) - PI);
-	start->sin_q = sin_fast(start->q);
-	start->cos_q = cos_fast(start->q);
+	start->q = wrap_2pi(atan2_approx(targ_0.v[1] - targ_0_offset.v[1], targ_0.v[0] - targ_0_offset.v[0]) - PI);
 
 	//do FK so we can express the target in frame 1 and do a 2 link planar arm solution
 	forward_kinematics(hb_0, start);
@@ -164,10 +162,7 @@ void ik_closedform_hexapod(mat4_t * hb_0, joint * start, vect3_t * targ_b)
 	int solidx = 1;
 	joint* j = start->child;
 	float theta1 = atan2_approx(sols[solidx].v[1], sols[solidx].v[0]);
-	j->q = theta1 - PI;
-	j->sin_q = sin_fast(j->q);
-	j->cos_q = cos_fast(j->q);
-
+	j->q = wrap_2pi(theta1 - PI);
 
 
 	j = j->child;
@@ -175,8 +170,6 @@ void ik_closedform_hexapod(mat4_t * hb_0, joint * start, vect3_t * targ_b)
 	for (int i = 0; i < 3; i++)
 		vdif.v[i] = targ_1.v[i] - sols[solidx].v[i];
 	float theta2 = atan2_approx(vdif.v[1], vdif.v[0]);
-	j->q = PI-((PI-theta1)+theta2);
-	j->sin_q = sin_fast(j->q);
-	j->cos_q = cos_fast(j->q);
+	j->q = wrap_2pi( PI-((PI-theta1)+theta2) );
 
 }

@@ -6,205 +6,205 @@
 // 		{21.50f,	-198.31677025f,		0.f}
 // };
 
-/*
-	Multiplies two mat4_t matrices, pass by pointer
-*/
-void mat4_t_mult_pbr(mat4_t * m1, mat4_t * m2, mat4_t * ret)
-{
-	int dim = 4;
-	int out_r; int out_c; int i;
-	for (out_r = 0; out_r < dim; out_r++)
-	{
-		for (out_c = 0; out_c < dim; out_c++)
-		{
-			float tmp = 0;
-			for (i = 0; i < dim; i++)
-			{
-				tmp = tmp + m1->m[out_r][i] * m2->m[i][out_c];
-			}
-			ret->m[out_r][out_c] = tmp;
-		}
-	}
-}
+// /*
+// 	Multiplies two mat4_t matrices, pass by pointer
+// */
+// void mat4_t_mult_pbr(mat4_t * m1, mat4_t * m2, mat4_t * ret)
+// {
+// 	int dim = 4;
+// 	int out_r; int out_c; int i;
+// 	for (out_r = 0; out_r < dim; out_r++)
+// 	{
+// 		for (out_c = 0; out_c < dim; out_c++)
+// 		{
+// 			float tmp = 0;
+// 			for (i = 0; i < dim; i++)
+// 			{
+// 				tmp = tmp + m1->m[out_r][i] * m2->m[i][out_c];
+// 			}
+// 			ret->m[out_r][out_c] = tmp;
+// 		}
+// 	}
+// }
 
 
-void forward_kinematics(mat4_t * hb_0, joint* f1_joint)
-{
-	if (f1_joint == NULL)
-		return;
+// void forward_kinematics(mat4_t * hb_0, joint* f1_joint)
+// {
+// 	if (f1_joint == NULL)
+// 		return;
 
-	joint * j = f1_joint;
-	while(j != NULL)
-	{
-		//float sth = (float)sin((double)j->q);
-		//float cth = (float)cos((double)j->q);
-		float sth = j->sin_q;
-		float cth = j->cos_q;
+// 	joint * j = f1_joint;
+// 	while(j != NULL)
+// 	{
+// 		//float sth = (float)sin((double)j->q);
+// 		//float cth = (float)cos((double)j->q);
+// 		float sth = j->sin_q;
+// 		float cth = j->cos_q;
 
-		mat4_t* r = &j->h_link;
-		mat4_t * him1_i = &j->him1_i;	//specify lookup ptr first for faster loading
+// 		mat4_t* r = &j->h_link;
+// 		mat4_t * him1_i = &j->him1_i;	//specify lookup ptr first for faster loading
 
-		him1_i->m[0][0] = cth * r->m[0][0] - r->m[1][0] * sth;
-		him1_i->m[0][1] = cth * r->m[0][1] - r->m[1][1] * sth;
-		him1_i->m[0][2] = cth * r->m[0][2] - r->m[1][2] * sth;
-		him1_i->m[0][3] = cth * r->m[0][3] - r->m[1][3] * sth;
-		him1_i->m[1][0] = cth * r->m[1][0] + r->m[0][0] * sth;
-		him1_i->m[1][1] = cth * r->m[1][1] + r->m[0][1] * sth;
-		him1_i->m[1][2] = cth * r->m[1][2] + r->m[0][2] * sth;
-		him1_i->m[1][3] = cth * r->m[1][3] + r->m[0][3] * sth;
-		him1_i->m[2][0] = r->m[2][0];
-		him1_i->m[2][1] = r->m[2][1];
-		him1_i->m[2][2] = r->m[2][2];
-		him1_i->m[2][3] = r->m[2][3];
+// 		him1_i->m[0][0] = cth * r->m[0][0] - r->m[1][0] * sth;
+// 		him1_i->m[0][1] = cth * r->m[0][1] - r->m[1][1] * sth;
+// 		him1_i->m[0][2] = cth * r->m[0][2] - r->m[1][2] * sth;
+// 		him1_i->m[0][3] = cth * r->m[0][3] - r->m[1][3] * sth;
+// 		him1_i->m[1][0] = cth * r->m[1][0] + r->m[0][0] * sth;
+// 		him1_i->m[1][1] = cth * r->m[1][1] + r->m[0][1] * sth;
+// 		him1_i->m[1][2] = cth * r->m[1][2] + r->m[0][2] * sth;
+// 		him1_i->m[1][3] = cth * r->m[1][3] + r->m[0][3] * sth;
+// 		him1_i->m[2][0] = r->m[2][0];
+// 		him1_i->m[2][1] = r->m[2][1];
+// 		him1_i->m[2][2] = r->m[2][2];
+// 		him1_i->m[2][3] = r->m[2][3];
 
-		j = j->child;
-	}
+// 		j = j->child;
+// 	}
 
-	joint * parent = f1_joint;
-	j = f1_joint;
-	mat4_t_mult_pbr(hb_0, &j->him1_i, &j->hb_i);	//load hb_1.		hb_0 * h0_1 = hb_1
-	while (j->child != NULL)
-	{
-		j = j->child;
-		mat4_t_mult_pbr(&parent->hb_i, &j->him1_i, &j->hb_i);
-		parent = j;
-	}
-}
+// 	joint * parent = f1_joint;
+// 	j = f1_joint;
+// 	mat4_t_mult_pbr(hb_0, &j->him1_i, &j->hb_i);	//load hb_1.		hb_0 * h0_1 = hb_1
+// 	while (j->child != NULL)
+// 	{
+// 		j = j->child;
+// 		mat4_t_mult_pbr(&parent->hb_i, &j->him1_i, &j->hb_i);
+// 		parent = j;
+// 	}
+// }
 
-/*
-	Copies the contents of one mat4_t to the other. could use memcpy interchangably
-*/
-void copy_mat4_t(mat4_t * dest, mat4_t * src)
-{
-	for (int r = 0; r < 4; r++)
-	{
-		for (int c = 0; c < 4; c++)
-		{
-			dest->m[r][c] = src->m[r][c];
-		}
-	}
-}
-
-
-/*
-	fast 2pi mod. needed for sin and cos FAST for angle limiting
- */
-float fmod_2pi(float in)
-{
-	uint8_t aneg = 0;
-	float in_eval = in;
-	if(in < 0)
-	{
-		aneg = 1;
-		in_eval = -in;
-	}
-	float fv = (float)((int)(in_eval*ONE_BY_TWO_PI));
-	if(aneg == 1)
-		fv = (-fv)-1;
-	return in-TWO_PI*fv;
-}
+// /*
+// 	Copies the contents of one mat4_t to the other. could use memcpy interchangably
+// */
+// void copy_mat4_t(mat4_t * dest, mat4_t * src)
+// {
+// 	for (int r = 0; r < 4; r++)
+// 	{
+// 		for (int c = 0; c < 4; c++)
+// 		{
+// 			dest->m[r][c] = src->m[r][c];
+// 		}
+// 	}
+// }
 
 
-void init_forward_kinematics_dh(joint* j, const dh_entry* dh, int num_joints)
-{
-	for (int i = 1; i <= num_joints; i++)
-	{
-		float sin_alpha = sin(dh[i].alpha);
-		float cos_alpha = cos(dh[i].alpha);
-		/*Precomputed Hd*Ha*Halpha*/
-		mat4_t link = {
-			{
-				{1,		0,				0,				dh[i].a},
-				{0,		cos_alpha,		-sin_alpha,		0},
-				{0,		sin_alpha,		cos_alpha,		dh[i].d},
-				{0,		0,				0,				1}
-			}
-		};
-		memcpy(&j[i].h_link, &link, sizeof(mat4_t));
-		copy_mat4_t(&j[i].him1_i, &j[i].h_link);	//htheta of 0 is the identity
-		j[i - 1].child = &j[i];
-	}
-	copy_mat4_t(&j[0].h_link, &j[0].hb_i);
-	j[0].q = 0;
-	j[num_joints].child = NULL;	//initialize the last node in the linked list to NULL
-	for (int i = 1; i <= num_joints; i++)
-		mat4_t_mult_pbr(&j[i - 1].hb_i, &j[i].him1_i, &j[i].hb_i);
-}
+// /*
+// 	fast 2pi mod. needed for sin and cos FAST for angle limiting
+//  */
+// float fmod_2pi(float in)
+// {
+// 	uint8_t aneg = 0;
+// 	float in_eval = in;
+// 	if(in < 0)
+// 	{
+// 		aneg = 1;
+// 		in_eval = -in;
+// 	}
+// 	float fv = (float)((int)(in_eval*ONE_BY_TWO_PI));
+// 	if(aneg == 1)
+// 		fv = (-fv)-1;
+// 	return in-TWO_PI*fv;
+// }
+
+
+// void init_forward_kinematics_dh(joint* j, const dh_entry* dh, int num_joints)
+// {
+// 	for (int i = 1; i <= num_joints; i++)
+// 	{
+// 		float sin_alpha = sin(dh[i].alpha);
+// 		float cos_alpha = cos(dh[i].alpha);
+// 		/*Precomputed Hd*Ha*Halpha*/
+// 		mat4_t link = {
+// 			{
+// 				{1,		0,				0,				dh[i].a},
+// 				{0,		cos_alpha,		-sin_alpha,		0},
+// 				{0,		sin_alpha,		cos_alpha,		dh[i].d},
+// 				{0,		0,				0,				1}
+// 			}
+// 		};
+// 		memcpy(&j[i].h_link, &link, sizeof(mat4_t));
+// 		copy_mat4_t(&j[i].him1_i, &j[i].h_link);	//htheta of 0 is the identity
+// 		j[i - 1].child = &j[i];
+// 	}
+// 	copy_mat4_t(&j[0].h_link, &j[0].hb_i);
+// 	j[0].q = 0;
+// 	j[num_joints].child = NULL;	//initialize the last node in the linked list to NULL
+// 	for (int i = 1; i <= num_joints; i++)
+// 		mat4_t_mult_pbr(&j[i - 1].hb_i, &j[i].him1_i, &j[i].hb_i);
+// }
 
 /*
 	Multiplies two mat4_t matrices, returns an entire structure. More wasteful
 */
-mat4_t mat4_t_mult(mat4_t m1, mat4_t m2)
-{
-	mat4_t ret;
-	int dim = 4;
-	int out_r; int out_c; int i;
-	for (out_r = 0; out_r < dim; out_r++)
-	{
-		for (out_c = 0; out_c < dim; out_c++)
-		{
-			float tmp = 0;
-			for (i = 0; i < dim; i++)
-			{
-				tmp = tmp + m1.m[out_r][i] * m2.m[i][out_c];
-			}
-			ret.m[out_r][out_c] = tmp;
-		}
-	}
-	return ret;
-}
+// mat4_t mat4_t_mult(mat4_t m1, mat4_t m2)
+// {
+// 	mat4_t ret;
+// 	int dim = 4;
+// 	int out_r; int out_c; int i;
+// 	for (out_r = 0; out_r < dim; out_r++)
+// 	{
+// 		for (out_c = 0; out_c < dim; out_c++)
+// 		{
+// 			float tmp = 0;
+// 			for (i = 0; i < dim; i++)
+// 			{
+// 				tmp = tmp + m1.m[out_r][i] * m2.m[i][out_c];
+// 			}
+// 			ret.m[out_r][out_c] = tmp;
+// 		}
+// 	}
+// 	return ret;
+// }
 
-void init_dynahex_kinematics(dynahex_t * h)
-{
-	mat4_t hb_0_leg0 =
-	{
-			{
-					{-1.f,	0,		0,		109.7858f},
-					{0,		1.f,	0,		0},
-					{0,		0,		-1.f,	0},
-					{0,		0,		0,		1.f}
-			}
-	};
-	const float angle_f = (2 * PI) / 6.f;
-	for (int leg = 0; leg < NUM_LEGS; leg++)
-	{
-		joint * j = h->leg[leg].chain;
-		j[0].him1_i = mat4_t_mult(Hz((float)leg * angle_f), hb_0_leg0);
-		copy_mat4_t(&j[0].hb_i, &j[0].him1_i);
+// void init_dynahex_kinematics(dynahex_t * h)
+// {
+// 	mat4_t hb_0_leg0 =
+// 	{
+// 			{
+// 					{-1.f,	0,		0,		109.7858f},
+// 					{0,		1.f,	0,		0},
+// 					{0,		0,		-1.f,	0},
+// 					{0,		0,		0,		1.f}
+// 			}
+// 	};
+// 	const float angle_f = (2 * PI) / 6.f;
+// 	for (int leg = 0; leg < NUM_LEGS; leg++)
+// 	{
+// 		joint * j = h->leg[leg].chain;
+// 		j[0].him1_i = mat4_t_mult(Hz((float)leg * angle_f), hb_0_leg0);
+// 		copy_mat4_t(&j[0].hb_i, &j[0].him1_i);
 
-		init_forward_kinematics_dh(j, hexleg_dh, NUM_JOINTS_HEXLEG);
-	}
-}
+// 		init_forward_kinematics_dh(j, hexleg_dh, NUM_JOINTS_HEXLEG);
+// 	}
+// }
 
 
-/*pre-loads all sin_q and cos_q for the chain*/
-void load_q(joint* chain_start)
-{
-	joint* j = chain_start;
-	while (j != NULL)
-	{
-		j->sin_q = sin(j->q);
-		j->cos_q = cos(j->q);
+// /*pre-loads all sin_q and cos_q for the chain*/
+// void load_q(joint* chain_start)
+// {
+// 	joint* j = chain_start;
+// 	while (j != NULL)
+// 	{
+// 		j->sin_q = sin(j->q);
+// 		j->cos_q = cos(j->q);
 
-		j = j->child;
-	}
-}
+// 		j = j->child;
+// 	}
+// }
 
 //static vect3_t o_foottip_3 = {{ -15.31409f, -9.55025f, 0.f }};
 
-void forward_kinematics_dynahexleg(dynahex_t* h)
-{
-	for (int leg = 0; leg < NUM_LEGS; leg++)
-	{
-		joint* j = &(h->leg[leg].chain[0]);
-		load_q(j->child);
-		forward_kinematics(&j->hb_i, j->child);
+// void forward_kinematics_dynahexleg(dynahex_t* h)
+// {
+// 	for (int leg = 0; leg < NUM_LEGS; leg++)
+// 	{
+// 		joint* j = &(h->leg[leg].chain[0]);
+// 		load_q(j->child);
+// 		forward_kinematics(&j->hb_i, j->child);
 
-		//htmatrix_vect3_mult(&j[3].hb_i, &o_foottip_3, &h->leg[leg].ef_b);
+// 		//htmatrix_vect3_mult(&j[3].hb_i, &o_foottip_3, &h->leg[leg].ef_b);
 
-		//calc_J_point(j, NUM_JOINTS_HEXLEG, h->leg[leg].ef_b);
-	}
-}
+// 		//calc_J_point(j, NUM_JOINTS_HEXLEG, h->leg[leg].ef_b);
+// 	}
+// }
 
 
 
