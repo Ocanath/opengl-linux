@@ -37,7 +37,7 @@ typedef struct mat3_t		//	Rotation matrices, skew symmetric matrices take this t
 	mat3 m;
 }mat3_t;
 
-typedef float mat4[4][4];		//Array wrapper for unambiguous pointer to 2d array
+typedef double mat4[4][4];		//Array wrapper for unambiguous pointer to 2d array
 typedef struct mat4_t			//homogeneous transformation matrices take this type. Allows working with arrays as a type directly (including returns) instead of pointers
 {
 	mat4 m;
@@ -87,7 +87,7 @@ typedef union {
 mat4_t mat4_t_mult(mat4_t m1, mat4_t m2);
 void mat4_t_mult_pbr(mat4_t * m1, mat4_t * m2, mat4_t * ret);
 void cross_pbr(vect3_t * v_a, vect3_t * v_b, vect3_t * ret);
-mat4_t Hz(float angle);
+mat4_t Hz(double angle);
 mat4_t Hy(float angle);
 mat4_t Hx(float angle);
 void ht_mat4_mult_pbr(mat4_t * m1, mat4_t * m2, mat4_t * ret);

@@ -246,7 +246,7 @@ int main(int argc, const char** argv) {
   // m = mj_loadXML("/home/admin/Psyonic/ability-hand-api/URDF/mujoco/abh_left_large.xml", 0, error, 1000);
 //    m = mj_loadXML("D:\\OcanathProj\\CAD\\hexapod\\mujoco\\hexapod.xml", 0, error, 1000);
     //m = mj_loadXML("/home/admin/OcanathProj/CAD/hexapod-cad/mujoco/hexapod.xml",0,error,1000);
-  m = mj_loadXML("/home/redux/OcanathProj/hexapod-cad/mujoco/hexapod.xml", 0, error, 1000);
+  m = mj_loadXML("/home/admin/OcanathProj/CAD/hexapod-cad/mujoco/hexapod.xml", 0, error, 1000);
     if (!m) {
     mju_error("Load model error: %s", error);
   }
