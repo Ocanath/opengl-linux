@@ -12,6 +12,8 @@ set(MY_KINEMATICS
 	vect.c
     vect.h
 )
-
+#target_include_directories(basic PRIVATE ${MY_KINEMATICS})
+target_sources(basic PRIVATE ${MY_KINEMATICS})
+target_compile_definitions(basic PRIVATE ${MY_KINEMATICS})
 # target_sources(basic PRIVATE ${MY_KINEMATICS})
 add_library(mkinematicslib SHARED ${MY_KINEMATICS})
