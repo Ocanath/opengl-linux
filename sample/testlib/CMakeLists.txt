@@ -1,5 +1,5 @@
 set(SROUSED
-    testfcn.c
+    testfcn.cc
 )
 
 add_library(myLib)

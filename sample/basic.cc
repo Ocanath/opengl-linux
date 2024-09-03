@@ -780,6 +780,8 @@ double get_qpos_from_jointname(mjData * data, const char * name)
 	return d->qpos[jointid];
 }
 
+
+
 // main function
 int main(int argc, const char** argv) {
   printf("wascuzup bichs\r\n");
