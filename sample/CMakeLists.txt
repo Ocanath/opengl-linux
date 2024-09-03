@@ -70,23 +70,31 @@ if(MUJOCO_HARDEN)
   endif()
 endif()
 
-# Build sample binaries
-add_executable(compile compile.cc)
-target_compile_options(compile PUBLIC ${MUJOCO_SAMPLE_COMPILE_OPTIONS})
-target_link_libraries(compile Threads::Threads)
-target_link_options(compile PRIVATE ${MUJOCO_SAMPLE_LINK_OPTIONS})
+# # Build sample binaries
+# add_executable(compile compile.cc)
+# target_compile_options(compile PUBLIC ${MUJOCO_SAMPLE_COMPILE_OPTIONS})
+# target_link_libraries(compile Threads::Threads)
+# target_link_options(compile PRIVATE ${MUJOCO_SAMPLE_LINK_OPTIONS})
 
-add_executable(testspeed testspeed.cc)
-target_compile_options(testspeed PUBLIC ${MUJOCO_SAMPLE_COMPILE_OPTIONS})
-target_link_libraries(testspeed Threads::Threads)
-target_link_options(testspeed PRIVATE ${MUJOCO_SAMPLE_LINK_OPTIONS})
+# add_executable(testspeed testspeed.cc)
+# target_compile_options(testspeed PUBLIC ${MUJOCO_SAMPLE_COMPILE_OPTIONS})
+# target_link_libraries(testspeed Threads::Threads)
+# target_link_options(testspeed PRIVATE ${MUJOCO_SAMPLE_LINK_OPTIONS})
 
-target_link_libraries(compile mujoco::mujoco)
-target_link_libraries(testspeed mujoco::mujoco)
+# target_link_libraries(compile mujoco::mujoco)
+# target_link_libraries(testspeed mujoco::mujoco)
 
 # Build samples that require GLFW.
 # add_subdirectory(testlib)
-add_executable(basic basic.cc testfcn.cc testfcn.h)
+set(MY_SRC
+  dynahex.cc
+  hexapod_footpath.cc
+  kinematics.cc
+  sin-math.cc
+  trig_fixed.cc
+  vect.cc
+)
+add_executable(basic basic.cc ${MY_SRC})
 target_compile_options(basic PUBLIC ${MUJOCO_SAMPLE_COMPILE_OPTIONS})
 target_link_libraries(
   basic
@@ -99,21 +107,21 @@ target_link_options(basic PRIVATE ${MUJOCO_SAMPLE_LINK_OPTIONS})
 
 
 
-add_executable(record record.cc array_safety.h)
-target_compile_options(record PUBLIC ${MUJOCO_SAMPLE_COMPILE_OPTIONS})
-target_link_libraries(
-  record
-  mujoco::mujoco
-  glfw
-  Threads::Threads
-)
-target_link_options(record PRIVATE ${MUJOCO_SAMPLE_LINK_OPTIONS})
+# add_executable(record record.cc array_safety.h)
+# target_compile_options(record PUBLIC ${MUJOCO_SAMPLE_COMPILE_OPTIONS})
+# target_link_libraries(
+#   record
+#   mujoco::mujoco
+#   glfw
+#   Threads::Threads
+# )
+# target_link_options(record PRIVATE ${MUJOCO_SAMPLE_LINK_OPTIONS})
 
 if(APPLE AND MUJOCO_BUILD_MACOS_FRAMEWORKS)
   embed_in_bundle(basic simulate)
-  embed_in_bundle(compile simulate)
-  embed_in_bundle(record simulate)
-  embed_in_bundle(testspeed simulate)
+  # embed_in_bundle(compile simulate)
+  # embed_in_bundle(record simulate)
+  # embed_in_bundle(testspeed simulate)
 endif()
 
 # Do not install if macOS Bundles are created as RPATH is managed manually there.
@@ -129,9 +137,9 @@ if(_INSTALL_SAMPLES)
   target_add_rpath(
     TARGETS
     basic
-    compile
-    record
-    testspeed
+    # compile
+    # record
+    # testspeed
     INSTALL_DIRECTORY
     "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}"
     LIB_DIRS
@@ -142,9 +150,9 @@ if(_INSTALL_SAMPLES)
 
   install(
     TARGETS basic
-            compile
-            record
-            testspeed
+            # compile
+            # record
+            # testspeed
     EXPORT ${PROJECT_NAME}
     RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}" COMPONENT samples
     LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT samples
