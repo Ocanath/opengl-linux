@@ -745,6 +745,40 @@ void mycontroller(const mjModel * m, mjData* d)
   }
 }
 
+
+int get_htim1_i_from_linkname(mjModel* model, const char * name, mat4_t * mat4)
+{
+	int bodyID = mj_name2id(model, mjOBJ_BODY, name);
+	vect4_t quat;
+	for (int i = 0; i < 4; i++)
+		quat.v[i] = model->body_quat[bodyID*4 + i];
+	vect3_t pos;
+	for (int i = 0; i < 3; i++)
+		pos.v[i] = model->body_pos[bodyID*3 + i];
+	*mat4 = quat_to_mat4_t(quat, pos);
+	return 0;
+}
+
+int get_htworld_i_from_linkname(mjData* data, const char * name, mat4_t * mat4)
+{
+	int bodyID = mj_name2id(m, mjOBJ_BODY, name);
+	vect4_t quat;
+	for (int i = 0; i < 4; i++)
+		quat.v[i] = data->xquat[bodyID*4 + i];
+	vect3_t pos;
+	for (int i = 0; i < 3; i++)
+		pos.v[i] = data->xpos[bodyID*3 + i];
+	*mat4 = quat_to_mat4_t(quat, pos);
+	return 0;
+}
+
+double get_qpos_from_jointname(mjData * data, const char * name)
+{
+    int jointid = mj_name2id(m, mjOBJ_JOINT, name);
+    jointid = m->jnt_qposadr[jointid];
+	return d->qpos[jointid];
+}
+
 // main function
 int main(int argc, const char** argv) {
   printf("wascuzup bichs\r\n");
@@ -752,33 +786,28 @@ int main(int argc, const char** argv) {
   // load and compile model
   char error[1000] = "Could not load binary model";
   // m = mj_loadXML("/home/admin/Psyonic/ability-hand-api/URDF/mujoco/abh_left_large.xml", 0, error, 1000);
-   m = mj_loadXML("D:\\OcanathProj\\CAD\\hexapod\\mujoco\\hexapod.xml", 0, error, 1000);
+//    m = mj_loadXML("D:\\OcanathProj\\CAD\\hexapod\\mujoco\\hexapod.xml", 0, error, 1000);
     //m = mj_loadXML("/home/admin/OcanathProj/CAD/hexapod-cad/mujoco/hexapod.xml",0,error,1000);
-  // m = mj_loadXML("/home/admin/OcanathProj/mujoco/model/humanoid/humanoid.xml", 0, error, 1000);
+  m = mj_loadXML("/home/redux/OcanathProj/hexapod-cad/mujoco/hexapod.xml", 0, error, 1000);
     if (!m) {
     mju_error("Load model error: %s", error);
   }
   // make data
   d = mj_makeData(m);
 
-
+  mat4_t h2_3;
+  get_htim1_i_from_linkname(m, "leg1_link3", &h2_3);
+  printf("---------------\n");
+  for(int r = 0; r < 4; r++)
+  {
+	for(int c = 0; c < 4; c++)
+	{
+		printf("%f ", h2_3.m[r][c]);
+	}
+	printf("\r\n");
+  }
+  printf("---------------\n");
   
-
-  int bodyID = mj_name2id(m, mjOBJ_BODY, "leg1_link3");
-  printf("%d, ", bodyID);
-  vect4_t quat;
-  for (int i = 0; i < 4; i++)
-	  quat.v[i] = m->body_quat[bodyID+i];
-  vect3_t pos;
-  for (int i = 0; i < 3; i++)
-	  pos.v[i] = m->body_pos[bodyID+i];
-  mat4_t leg1h2_3 = quat_to_mat4_t(quat, pos);
-  int parent = m->body_parentid[bodyID];
-  if (parent != -1)
-	  printf("parent = %s\r\n", (const char *)&m->names[m->name_bodyadr[parent]]);
-  else
-	  printf("no parent...\r\n");
-
   //todo: use the above model data to load up a kinematic tree
   //biggest problem: documentation does not make a DFS tree traversal very apparent.
   double o_axis[3] = { -0.0177556, 0.0988847, 0.0333596 };
@@ -908,6 +937,52 @@ int main(int argc, const char** argv) {
 	//for (int i = 0; i < 3; i++)
 	//	pos.v[i] = d->xpos[bodyID*3 + i];
 	//printf("%f, %f, %f\r\n", pos.v[0]*1000, pos.v[1]*1000, pos.v[2]*1000);
+
+	
+
+	mat4_t hw_base, hw_l1l1, hw_l1l2, hw_l1l3;
+	get_htworld_i_from_linkname(d, "base", &hw_base);
+	get_htworld_i_from_linkname(d, "leg1_link1", &hw_l1l1);
+	get_htworld_i_from_linkname(d, "leg1_link1", &hw_l1l2);
+	get_htworld_i_from_linkname(d, "leg1_link3", &hw_l1l3);
+	mat4_t hbase_w;
+	ht_inverse_ptr(&hw_base, &hbase_w);
+	// printf("%f, %f, %f\r\n", hw_base.m[0][3]*1000, hw_base.m[1][3]*1000, hw_base.m[2][3]*1000);	
+	double l1_q1 = get_qpos_from_jointname(d, "leg1_q1");
+	double l1_q2 = get_qpos_from_jointname(d, "leg1_q2");
+	double l1_q3 = get_qpos_from_jointname(d, "leg1_q3");
+	mat4_t Hzq1 = Hz(l1_q1);
+	mat4_t Hzq2 = Hz(l1_q2);
+	mat4_t Hzq3 = Hz(l1_q3);
+
+	mat4_t hb_link1, h1_link2, h2_link3;
+	get_htim1_i_from_linkname(m, "leg1_link1", &hb_link1);
+	get_htim1_i_from_linkname(m, "leg1_link2", &h1_link2);
+	get_htim1_i_from_linkname(m, "leg1_link3", &h2_link3);
+	mat4_t hb_1 = mat4_t_mult(hb_link1, Hzq1);
+	//hb_1 = I*hb_1
+	mat4_t h1_2 = mat4_t_mult(h1_link2, Hzq2);
+	mat4_t hb_2 = mat4_t_mult(hb_1, h1_2);
+	mat4_t h2_3 = mat4_t_mult(h2_link3, Hzq3);
+	mat4_t hb_3 = mat4_t_mult(hb_2, h2_3);
+
+	mat4_t h1_b, h2_b, h3_b;
+	ht_inverse_ptr(&hb_3, &h3_b);
+	ht_inverse_ptr(&hb_2, &h2_b);
+	ht_inverse_ptr(&hb_1, &h1_b);
+
+	mat4_t mj_hb_3 = mat4_t_mult(hbase_w, hw_l1l3);
+	mat4_t test = mat4_t_mult(mj_hb_3, h3_b);
+	printf("--------------------------------\n");
+	for(int r = 0; r < 4; r++)
+	{
+		for( int c = 0; c < 4; c++)
+		{
+			printf("%f ", test.m[r][c]);
+		}
+		printf("\r\n");
+	}
+	printf("--------------------------------\n");
 
 
     // int base = mj_name2id(m,mjOBJ_BODY,"base");
