@@ -93,7 +93,7 @@ add_subdirectory(src/xml)
 add_subdirectory(src/render)
 add_subdirectory(src/thread)
 add_subdirectory(src/ui)
-add_subdirectory(src/m_kinematics)
+#add_subdirectory(src/m_kinematics)
 
 target_compile_definitions(mujoco PRIVATE _GNU_SOURCE CCD_STATIC_DEFINE MUJOCO_DLL_EXPORTS -DMC_IMPLEM_ENABLE)
 if(MUJOCO_ENABLE_AVX_INTRINSICS)

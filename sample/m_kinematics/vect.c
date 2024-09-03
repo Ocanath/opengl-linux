@@ -6,6 +6,7 @@
  */
 #include "vect.h"
 #include "sin-math.h"
+#include <math.h>
 
 /*returns the inverse of a homogeneous transform type mat4_t matrix*/
 void ht_inverse_ptr(mat4_t * hin, mat4_t * hout)
@@ -37,7 +38,7 @@ mat4_t mat4_t_mult(mat4_t m1, mat4_t m2)
 	{
 		for (out_c = 0; out_c < dim; out_c++)
 		{
-			float tmp = 0;
+			double tmp = 0;
 			for (i = 0; i < dim; i++)
 			{
 				tmp = tmp + m1.m[out_r][i] * m2.m[i][out_c];
@@ -107,10 +108,10 @@ void cross_pbr(vect3_t * v_a, vect3_t * v_b, vect3_t * ret)
 }
 
 /*Loads rotation about coordinate. 0 = identity*/
-mat4_t Hz(float angle)
+mat4_t Hz(double angle)
 {
-	float cth = cos_fast(angle);
-	float sth = sin_fast(angle);
+	double cth = cos(angle);
+	double sth = sin(angle);
 	mat4_t r;
 	r.m[0][0] = cth;		r.m[0][1] = -sth;		r.m[0][2] = 0;	r.m[0][3] = 0;
 	r.m[1][0] = sth;		r.m[1][1] = cth;		r.m[1][2] = 0;	r.m[1][3] = 0;

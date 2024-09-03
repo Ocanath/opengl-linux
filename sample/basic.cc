@@ -566,29 +566,6 @@ void foot_path(float time, float h, float w, float period, vect3_t* v)
 	}
 }
 
-/*returns homogeneous transform mat4_t matrix which is the rotation 'analge' around the x axis */
-mat4_t Hx(float angle)
-{
-	mat4_t ret;
-	ret.m[0][0] = 1;	ret.m[0][1] = 0;				ret.m[0][2] = 0;				ret.m[0][3] = 0;
-	ret.m[1][0] = 0;	ret.m[1][1] = cos(angle);	ret.m[1][2] = -sin(angle);	ret.m[1][3] = 0;
-	ret.m[2][0] = 0;	ret.m[2][1] = sin(angle);	ret.m[2][2] = cos(angle);	ret.m[2][3] = 0;
-	ret.m[3][0] = 0;	ret.m[3][1] = 0;				ret.m[3][2] = 0;				ret.m[3][3] = 1;
-	return ret;
-}
-/*Loads rotation about coordinate. 0 = identity*/
-mat4_t Hz(float angle)
-{
-	float cth = cos(angle);
-	float sth = sin(angle);
-	mat4_t r;
-	r.m[0][0] = cth;		r.m[0][1] = -sth;		r.m[0][2] = 0;	r.m[0][3] = 0;
-	r.m[1][0] = sth;		r.m[1][1] = cth;		r.m[1][2] = 0;	r.m[1][3] = 0;
-	r.m[2][0] = 0;			r.m[2][1] = 0;			r.m[2][2] = 1;	r.m[2][3] = 0;
-	r.m[3][0] = 0;			r.m[3][1] = 0;			r.m[3][2] = 0;	r.m[3][3] = 1;
-	return r;
-}
-
 
 /*pass by reference htmatrix (special subset of mat4_t) and 3 vector)*/
 void htmatrix_vect3_mult(mat4_t* m, vect3_t* v, vect3_t* ret)
@@ -973,7 +950,6 @@ int main(int argc, const char** argv) {
 
 	mat4_t mj_hb_3 = mat4_t_mult(hbase_w, hw_l1l3);
 	mat4_t test = mat4_t_mult(mj_hb_3, h3_b);
-	printf("--------------------------------\n");
 	for(int r = 0; r < 4; r++)
 	{
 		for( int c = 0; c < 4; c++)

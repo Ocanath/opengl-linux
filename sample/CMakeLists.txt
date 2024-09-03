@@ -85,14 +85,15 @@ target_link_libraries(compile mujoco::mujoco)
 target_link_libraries(testspeed mujoco::mujoco)
 
 # Build samples that require GLFW.
-
 add_executable(basic basic.cc)
+add_subdirectory(m_kinematics)
 target_compile_options(basic PUBLIC ${MUJOCO_SAMPLE_COMPILE_OPTIONS})
 target_link_libraries(
   basic
   mujoco::mujoco
   glfw
   Threads::Threads
+  mkinematicslib
 )
 target_link_options(basic PRIVATE ${MUJOCO_SAMPLE_LINK_OPTIONS})
 
