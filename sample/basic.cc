@@ -22,6 +22,7 @@
 #include "hexapod_footpath.h"
 #include "kinematics.h"
 #include "vect.h"
+#include "testfcn.h"
 
 // MuJoCo data structures
 mjModel* m = NULL;                  // MuJoCo model
@@ -782,6 +783,11 @@ double get_qpos_from_jointname(mjData * data, const char * name)
 // main function
 int main(int argc, const char** argv) {
   printf("wascuzup bichs\r\n");
+
+  int i = 0;
+  increment_an_integer(&i);
+  printf("%d\r\n",i);
+  return 0;
 
   // load and compile model
   char error[1000] = "Could not load binary model";

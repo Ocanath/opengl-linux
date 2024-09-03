@@ -85,6 +85,9 @@ target_link_libraries(compile mujoco::mujoco)
 target_link_libraries(testspeed mujoco::mujoco)
 
 # Build samples that require GLFW.
+add_subdirectory(testlib)
+add_executable(FUCK fuck.c)
+target_link_libraries(FUCK myLib)
 
 add_executable(basic basic.cc)
 target_compile_options(basic PUBLIC ${MUJOCO_SAMPLE_COMPILE_OPTIONS})
@@ -93,8 +96,11 @@ target_link_libraries(
   mujoco::mujoco
   glfw
   Threads::Threads
+  myLib
 )
 target_link_options(basic PRIVATE ${MUJOCO_SAMPLE_LINK_OPTIONS})
+
+
 
 add_executable(record record.cc array_safety.h)
 target_compile_options(record PUBLIC ${MUJOCO_SAMPLE_COMPILE_OPTIONS})
