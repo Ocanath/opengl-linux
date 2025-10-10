@@ -10,6 +10,11 @@ FetchContent_Declare(
 	GIT_TAG 3.3.6
 )
 
+# Disable MuJoCo's sample programs and tests - potentially bad? 
+set(MUJOCO_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(MUJOCO_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(MUJOCO_BUILD_SIMULATE OFF CACHE BOOL "" FORCE)
+
 FetchContent_MakeAvailable(mujoco)
 
 # Create the main executable
